@@ -1,0 +1,27 @@
+{
+  "app": {
+    "title": "BachHoaSi",
+    "headerColor": "",
+    "textColor": "white",
+    "statusBarColor": "#EF1724",
+    "leftButton": "none",
+    "textAlign": "left",
+    "actionBarHidden": false,
+    "hideAndroidBottomNavigationBar": false,
+    "hideIOSSafeAreaBottom": false,
+    "selfControlLoading": false,
+    "statusBar": "normal"
+  },
+  "debug": false,
+  "listCSS": [],
+  "listSyncJS": [],
+  "listAsyncJS": [],
+  "pages": [],
+  "template": {
+    "primaryColor": "",
+    "searchBar": true,
+    "orderValue": "500000",
+    "oaIDtoOpenChat": "3845899341339907617",
+    "shippingFee": "30000"
+  }
+}
