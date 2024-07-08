@@ -28,8 +28,7 @@ const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
           hidden && "anime-move-down"
         )}
         // @ts-ignore
-        ref={ref}
-      >
+        ref={ref}>
         {children && <Box m={0}>{children}</Box>}
         <Box m={0} flex className="gap-4">
           {listBtn?.map((btn) => (
@@ -38,8 +37,7 @@ const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
               fullWidth
               variant={btn.type}
               size="large"
-              onClick={btn.onClick}
-            >
+              onClick={btn.onClick}>
               {btn.content}
             </Button>
           ))}

@@ -1,37 +1,37 @@
-import { useRecoilState } from "recoil";
-import { useCallback } from "react";
-import { CartProduct } from "../models";
-import { cartState } from "../state";
+import { useCallback } from 'react';
+import { CartProduct } from '../models';
+import useStore from '../store';
 
 const useAddProductToCart = () => {
-  const [cart, setCart] = useRecoilState(cartState);
+  const { cart, setCart } = useStore((state) => state);
+
   return useCallback(
     ({ productOrder }: { productOrder: CartProduct }) => {
       setCart((oldCart) => {
         const cart = { ...oldCart };
-        const orderIndex = cart.listOrder.findIndex(
+        const orderIndex = cart.items.findIndex(
           (prod) => prod.id === productOrder.id
         );
         if (orderIndex >= 0) {
           // available in cart
-          cart.listOrder = [...cart.listOrder];
-          if (productOrder.order.quantity === 0) {
+          cart.items = [...cart.items];
+          if (productOrder.quantity === 0) {
             // delete product in cart
-            cart.listOrder.splice(orderIndex, 1);
+            cart.items.splice(orderIndex, 1);
           } else {
-            cart.listOrder.splice(orderIndex, 1, {
-              ...cart.listOrder[orderIndex],
-              order: productOrder.order,
+            cart.items.splice(orderIndex, 1, {
+              ...cart.items[orderIndex],
+              quantity: productOrder.quantity,
             });
           }
-        } else if (productOrder.order.quantity > 0) {
-          cart.listOrder = cart.listOrder.concat({ ...productOrder });
+        } else if (productOrder.quantity > 0) {
+          cart.items = cart.items.concat({ ...productOrder });
         }
-        cart.date = new Date();
+        cart.updatedDate = new Date().toISOString();
         return cart;
       });
     },
-    [cart]
+    [cart, setCart]
   );
 };
 export default useAddProductToCart;

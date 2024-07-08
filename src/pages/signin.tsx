@@ -1,91 +1,27 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs"; // Import bcryptjs correctly
+
 import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecoilState } from "recoil";
-import { getAccessToken, getPhoneNumber, getUserInfo } from "zmp-sdk/apis";
 import { Button, Input, Page, Text } from "zmp-ui";
 import useSetHeader from "../hooks/useSetHeader";
+import { LoginResponse } from "../models";
 import { changeStatusBarColor } from "../services";
 import api from "../services/api";
-import {
-  passwordState,
-  phoneNumberState,
-  usernameState,
-  storeIdState,
-} from "../state"; // Import state
-
-interface LoginResponse {
-  isSuccess: boolean;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-    storeId: number;
-    tokenType: string;
-  };
-}
+import useStore from "../store";
 
 const Signin: React.FunctionComponent = () => {
-  const [username, setUsername] = useRecoilState(usernameState);
-  const [password, setPassword] = useRecoilState(passwordState);
-  const [phoneNumber, setPhoneNumber] = useRecoilState(phoneNumberState);
-  const [storeId, setStoreId] = useRecoilState(storeIdState);
+  const { email, setEmail, password, setPassword } = useStore((state) => state);
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
   const handleCustomerLogin = useCallback(async () => {
     try {
-      // Lấy thông tin số điện thoại từ Zalo
-      const { token } = await new Promise((resolve, reject) => {
-        getPhoneNumber({
-          success: (data) => {
-            resolve(data);
-          },
-          fail: (error) => reject(error),
-        });
-      });
-
-      // Lưu access_token từ zalo vào sessionStorage
-      const accessTokenZalo = await new Promise((resolve, reject) => {
-        getAccessToken({
-          success: (data) => {
-            sessionStorage.setItem("accessTokenZalo", data as string);
-            console.log("access_token_zalo:", data);
-            resolve(data as string);
-          },
-          fail: (error) => reject(error),
-        });
-      });
-
-      // // Trích xuất số điện thoại từ token
-      // const phoneNumber = await fetch(`https://graph.zalo.me/v2.0/me/info`, {
-      //   headers: {
-      //     access_token: accessTokenZalo,
-      //     code: token,
-      //     secret_key: "0TR1rUOW664SjBe84Y4m",
-      //   },
-      // })
-      //   .then((response) => response.json())
-      //   .then((data) => data.data.number);
-
       const phoneNumber = "84333336938";
-
-      // Hash số điện thoại bằng bcryptjs
-      const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
-      console.log("Hashed phone number:", hashedPhoneNumber);
-
-      // // Gọi API getUserInfo của Zalo
-      // const { userInfo } = await new Promise((resolve, reject) => {
-      //   getUserInfo({
-      //     success: (data) => {
-      //       resolve(data);
-      //     },
-      //     fail: (error) => reject(error),
-      //   });
-      // });
+      const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 10); // Example: 10 is the salt rounds
 
       const zaloId = "3368637342326461234";
 
-      // Gọi API đăng nhập với vai trò customer
+      // Call login API with customer role
       const loginResponse = await api.post<LoginResponse>("/auth/zalo/login", {
         zaloId: zaloId,
         hashPhone: hashedPhoneNumber,
@@ -111,6 +47,10 @@ const Signin: React.FunctionComponent = () => {
     }
   }, []);
 
+  const handleGoToSignup = useCallback(() => {
+    navigate("/signup");
+  }, [navigate]);
+
   useEffect(() => {
     setHeader({
       customTitle: "Đăng nhập",
@@ -118,33 +58,25 @@ const Signin: React.FunctionComponent = () => {
       type: "secondary",
     });
     changeStatusBarColor("secondary");
-  }, []);
-
-  const handleGoToSignup = useCallback(() => {
-    navigate("/signup");
-  }, [navigate]);
+  }, [setHeader]);
 
   return (
     <Page>
       <div className="bg-primary">
         <div className="p-4">
           <Text type="h2" className="text-center text-white font-bold">
-            Bach Hoa Si
+            Đăng nhập
           </Text>
         </div>
       </div>
-      <div className="bg-gray-100 h-3" />
       <div className="bg-white p-4">
-        <p className="text-center text-black font-bold">
-          Đăng nhập với vai trò shipper
-        </p>
         <form onSubmit={handleCustomerLogin}>
           <div className="mb-4">
             <Input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="cus-input-search"
             />
           </div>
@@ -157,20 +89,14 @@ const Signin: React.FunctionComponent = () => {
               className="cus-input-search"
             />
           </div>
-          <Button
-            // onClick={}
-            type="highlight"
-            htmlType="submit"
-            className="w-full"
-          >
-            {"Đăng nhập"}
+          <Button type="highlight" htmlType="submit" className="w-full">
+            Đăng nhập
           </Button>
           <div className="mt-4 text-center">
             <Button
               type="highlight"
               onClick={handleCustomerLogin}
-              className="text-primary"
-            >
+              className="text-primary">
               Đăng nhập với vai trò store
             </Button>
           </div>

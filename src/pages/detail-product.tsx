@@ -1,48 +1,39 @@
 import React, { useEffect, useMemo } from "react";
-import { Product } from "../models";
-import { calcSalePercentage, convertPrice } from "../utils";
+import { useNavigate, useParams } from "react-router-dom";
+import { openShareSheet } from "zmp-sdk";
+import { Box, Icon, Page } from "zmp-ui";
 import ButtonFixed, {
   ButtonType,
 } from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
-import { Box, Icon, Page } from "zmp-ui";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import {
-  cartState,
-  cartTotalPriceState,
-  openProductPickerState,
-  productInfoPickedState,
-  storeState,
-} from "../state";
-
-import { useParams, useNavigate } from "react-router-dom";
-import { changeStatusBarColor } from "../services";
 import useSetHeader from "../hooks/useSetHeader";
-import { openShareSheet } from "zmp-sdk";
-import { Card, Space } from "antd";
+import { Product } from "../models";
+import { changeStatusBarColor } from "../services";
+import useStore from "../store";
+import { calcSalePercentage, convertPrice } from "../utils";
 
 const DetailProduct = () => {
-  const storeInfo = useRecoilValue(storeState);
-  const cart = useRecoilValue(cartState);
-  const totalPrice = useRecoilValue(cartTotalPriceState);
-
+  const {
+    store,
+    cart,
+    cartTotalPrice,
+    setOpenProductPicker,
+    setProductInfoPicked,
+  } = useStore((state) => state);
   let { productId } = useParams();
-
-  const setOpenSheet = useSetRecoilState(openProductPickerState);
-  const setProductInfoPicked = useSetRecoilState(productInfoPickedState);
 
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
   const product: Product | undefined = useMemo(() => {
-    if (storeInfo) {
-      const currentProduct = storeInfo.listProducts.find(
+    if (store) {
+      const currentProduct = store.listProducts.find(
         (item) => item.id === Number(productId)
       );
       return currentProduct;
     }
     return undefined;
-  }, [productId]);
+  }, [productId, store]);
 
   const salePercentage = useMemo(
     () => calcSalePercentage(product?.salePrice!, product?.retailPrice!),
@@ -55,11 +46,11 @@ const DetailProduct = () => {
       content: "Thêm vào giỏ",
       type: "primary",
       onClick: () => {
-        setOpenSheet(true);
+        setOpenProductPicker(true);
         setProductInfoPicked({ productId: Number(productId), isUpdate: true });
       },
     }),
-    [product, storeInfo, productId]
+    [product, store, productId]
   );
 
   const btnPayment: ButtonType = useMemo(
@@ -75,8 +66,8 @@ const DetailProduct = () => {
   );
 
   const listBtn = useMemo<ButtonType[]>(
-    () => (totalPrice > 0 ? [btnPayment, btnCart] : [btnCart]),
-    [totalPrice, btnCart, btnPayment]
+    () => (cartTotalPrice > 0 ? [btnPayment, btnCart] : [btnCart]),
+    [cartTotalPrice, btnCart, btnPayment]
   );
 
   useEffect(() => {
@@ -94,8 +85,7 @@ const DetailProduct = () => {
                 thumbnail: product?.imgProduct,
               },
             })
-          }
-        >
+          }>
           <Icon icon="zi-share-external-1" />
         </div>
       ),
@@ -106,8 +96,7 @@ const DetailProduct = () => {
     <Page>
       <div
         className=" relative bg-white w-full"
-        style={{ paddingBottom: totalPrice > 0 ? "120px" : "80px" }}
-      >
+        style={{ paddingBottom: cartTotalPrice > 0 ? "120px" : "80px" }}>
         {product && (
           <>
             <img src={product.imgProduct} alt="" className="w-full h-auto" />
@@ -130,18 +119,17 @@ const DetailProduct = () => {
               m={0}
               px={4}
               py={5}
-              className=" text-justify break-words whitespace-pre-line"
-            >
+              className=" text-justify break-words whitespace-pre-line">
               {product.description}
             </Box>
           </>
         )}
       </div>
 
-      {!!totalPrice && (
+      {!!cartTotalPrice && (
         <ButtonPriceFixed
           quantity={cart.listOrder.length}
-          totalPrice={totalPrice}
+          totalPrice={cartTotalPrice}
           handleOnClick={() => navigate("/finish-order")}
         />
       )}

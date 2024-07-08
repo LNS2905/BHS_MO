@@ -1,9 +1,9 @@
 import React from "react";
+import { openChat } from "zmp-sdk";
 import { Button, Icon } from "zmp-ui";
+import { DEFAULT_OA_ID } from "../../constants";
 import { Store } from "../../models";
 import { getConfig } from "../config-provider";
-import { DEFAULT_OA_ID } from "../../constants";
-import { openChat } from "zmp-sdk";
 
 const CardShop = ({ storeInfo }: { storeInfo: Store }) => {
   const handleOpenChat = () => {
@@ -35,7 +35,7 @@ const CardShop = ({ storeInfo }: { storeInfo: Store }) => {
               <div className="flex items-center justify-center">
                 <Icon icon="zi-location-solid" size={12} />
               </div>
-              <div className=" pl-1">{storeInfo.address}</div>
+              <div className=" pl-1">{storeInfo.location}</div>
             </div>
           </div>
         </div>
@@ -44,8 +44,7 @@ const CardShop = ({ storeInfo }: { storeInfo: Store }) => {
         className="chat-button"
         variant="primary"
         size="small"
-        onClick={handleOpenChat}
-      >
+        onClick={handleOpenChat}>
         Nhắn tin
       </Button>
     </div>

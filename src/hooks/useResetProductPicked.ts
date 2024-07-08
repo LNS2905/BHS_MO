@@ -1,15 +1,15 @@
-import { useCallback } from "react";
-import {
-  initialProductInfoPickedState,
-  productInfoPickedState,
-} from "./../state";
-import { useSetRecoilState } from "recoil";
+import { useCallback } from 'react';
+import useStore from '../store';
 
 const useResetProductPicked = () => {
-  const setProductPicked = useSetRecoilState(productInfoPickedState);
+  const { setProductInfoPicked } = useStore((state) => state);
   return useCallback(
-    () => setProductPicked(initialProductInfoPickedState),
-    [setProductPicked]
+    () =>
+      setProductInfoPicked({
+        productId: -1,
+        isUpdate: false,
+      }),
+    [setProductInfoPicked]
   );
 };
 export default useResetProductPicked;

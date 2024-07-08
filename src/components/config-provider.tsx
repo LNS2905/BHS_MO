@@ -1,5 +1,4 @@
-import React from "react";
-import { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 import appConfig from "../../app-config.json";
 
 export function getConfig<T>(getter: (config: typeof appConfig) => T) {

@@ -1,6 +1,5 @@
 import React, { SyntheticEvent, useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { selector, useRecoilValue, useSetRecoilState } from "recoil";
+import { useNavigate } from "react-router-dom";
 import { Box, Button, Input, Page, Select, Text } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import { getConfig } from "../components/config-provider";
@@ -10,37 +9,22 @@ import AddressForm from "../constants/address-form";
 import useSetHeader from "../hooks/useSetHeader";
 import { AddressFormType } from "../models";
 import { changeStatusBarColor, pay } from "../services";
-import {
-  cartState,
-  cartTotalPriceState,
-  openProductPickerState,
-  productInfoPickedState,
-  productState,
-  storeState,
-} from "../state";
+import useStore from "../store";
 import { convertPrice, cx } from "../utils";
 
 const { Option } = Select;
 
-const locationVnState = selector({
-  key: "locationVn",
-  get: () => import("../dummy/location").then((module) => module.default),
-});
-
 const FinishOrder: React.FC = () => {
-  const cart = useRecoilValue(cartState);
-  const totalPrice = useRecoilValue(cartTotalPriceState);
-  const listProducts = useRecoilValue(productState);
-  const storeInfo = useRecoilValue(storeState);
+  const {
+    cart,
+    cartTotalPrice,
+    store,
+    setOpenProductPicker,
+    setProductInfoPicked,
+  } = useStore((state) => state);
   const shippingFee = Number(
     getConfig((config) => config.template.shippingFee)
   );
-
-  const setOpenSheet = useSetRecoilState(openProductPickerState);
-  const setProductInfoPicked = useSetRecoilState(productInfoPickedState);
-  const setHeader = useSetHeader();
-
-  const locationVN = useRecoilValue(locationVnState);
 
   const [currentCity, setCurrentCity] = useState(locationVN[0]);
   const [currentDistrict, setCurrentDistrict] = useState(
@@ -58,14 +42,15 @@ const FinishOrder: React.FC = () => {
   );
 
   const navigate = useNavigate();
+  const setHeader = useSetHeader();
 
   const handlePayMoney = async (e: SyntheticEvent) => {
     e.preventDefault();
-    await pay(totalPrice);
+    await pay(cartTotalPrice);
   };
 
   const handleChooseProduct = (productId: number) => {
-    setOpenSheet(true);
+    setOpenProductPicker(true);
     setProductInfoPicked({ productId, isUpdate: true });
   };
 
@@ -140,7 +125,7 @@ const FinishOrder: React.FC = () => {
         <div className=" mb-[80px]">
           <Box m={0} p={4} className=" bg-white">
             <CardStore
-              store={storeInfo}
+              store={store}
               hasRightSide={false}
               hasBorderBottom={false}
               type="order"
@@ -148,7 +133,7 @@ const FinishOrder: React.FC = () => {
           </Box>
           <Box mx={3} mb={2}>
             {cart.listOrder.map((product) => {
-              const productInfo = listProducts.find(
+              const productInfo = store?.listProducts.find(
                 (prod) => prod.id === product.id
               );
               return (
@@ -167,7 +152,7 @@ const FinishOrder: React.FC = () => {
           <Box m={4} flex flexDirection="row" justifyContent="space-between">
             <span className=" text-base font-medium">Đơn hàng</span>
             <span className=" text-base font-medium text-primary">
-              {convertPrice(totalPrice)}đ
+              {convertPrice(cartTotalPrice)}đ
             </span>
           </Box>
           <Box m={0} px={4} className=" bg-white">
@@ -182,27 +167,23 @@ const FinishOrder: React.FC = () => {
               return (
                 <div
                   key={item.name}
-                  className={cx("py-3", item.name !== "ward" && "border-b")}
-                >
+                  className={cx("py-3", item.name !== "ward" && "border-b")}>
                   <Text
                     size="large"
                     bold
-                    className="after:content-['_*'] after:text-primary after:align-middle"
-                  >
+                    className="after:content-['_*'] after:text-primary after:align-middle">
                     {item.label}
                   </Text>
                   <Box className="relative" m={0}>
                     {item.type === "select" ? (
                       <Select
-                        // key={value}
                         id={item.name}
                         placeholder={item.placeholder}
                         name={item.name}
                         value={value}
                         onChange={(value) => {
                           handleOnSelect(value as string);
-                        }}
-                      >
+                        }}>
                         {listOptions?.map((option) => (
                           <Option
                             key={option.id}
@@ -226,16 +207,14 @@ const FinishOrder: React.FC = () => {
                       fullWidth
                       style={{ marginBottom: "10px" }}
                       className=" bg-primary text-white rounded-lg h-12"
-                      onClick={handlePaySuccess}
-                    >
+                      onClick={handlePaySuccess}>
                       Thanh toán COD
                     </Button>
                     <Button
                       htmlType="submit"
                       fullWidth
                       className=" bg-primary text-white rounded-lg h-12"
-                      onClick={handlePayMoney}
-                    >
+                      onClick={handlePayMoney}>
                       Thanh toán banking
                     </Button>
                   </ButtonFixed>
@@ -254,7 +233,7 @@ const FinishOrder: React.FC = () => {
 
           <Text className="p-4 text-center">
             {`Đặt hàng đồng nghĩa với việc bạn đồng ý quan tâm 
-              ${storeInfo.nameStore} 
+              ${store?.nameStore} 
               để nhận tin tức mới`}
           </Text>
         </div>
