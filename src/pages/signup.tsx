@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Input, Page, Text } from "zmp-ui";
@@ -34,14 +33,15 @@ const Signup: React.FunctionComponent = () => {
     async (event) => {
       event.preventDefault();
 
-      // Hash số điện thoại bằng bcryptjs
-      const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
+      // // Hash số điện thoại bằng bcryptjs
+      // const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
+      const phoneNumber = "84333336938";
 
       // Gọi API đăng ký
       const response = await api.post<SignupResponse>("/auth/zalo/signup", {
         name,
         location,
-        phoneNumber: hashedPhoneNumber,
+        phoneNumber,
         zaloId: "3398637342326461234",
       });
 
@@ -68,7 +68,7 @@ const Signup: React.FunctionComponent = () => {
 
   useEffect(() => {
     setHeader({
-      customTitle: "Đăng ký",
+      customTitle: "Bách Hóa Sỉ",
       hasLeftIcon: false,
       type: "secondary",
     });

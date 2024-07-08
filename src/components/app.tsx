@@ -30,14 +30,16 @@ const MyApp = () => {
     const storeIdFromSession = sessionStorage.getItem("storeId");
     if (accessToken && storeIdFromSession) {
       setLoginResponse({
+        isSuccess: true,
         accessToken,
         refreshToken: "",
         storeId: Number(storeIdFromSession),
         tokenType: "BEARER",
+        message: "",
       });
       setStoreId(storeIdFromSession);
     }
-  }, []);
+  }, [setLoginResponse, setStoreId]);
 
   return (
     <ConfigProvider

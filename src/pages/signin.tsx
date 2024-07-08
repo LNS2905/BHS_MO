@@ -38,7 +38,7 @@ const Signin: React.FunctionComponent = () => {
         );
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
-        navigate("/");
+        navigate("/menu");
       } else {
         console.log(loginResponse.data.message);
       }
@@ -53,7 +53,7 @@ const Signin: React.FunctionComponent = () => {
 
   useEffect(() => {
     setHeader({
-      customTitle: "Đăng nhập",
+      customTitle: "Bách Hóa Sỉ",
       hasLeftIcon: false,
       type: "secondary",
     });
