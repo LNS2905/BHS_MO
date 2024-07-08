@@ -1,5 +1,4 @@
-import React from "react";
-import { ImgHTMLAttributes, ReactNode } from "react";
+import React, { ImgHTMLAttributes, ReactNode } from "react";
 import cx from "../utils/cx";
 
 interface ImageWithRatioProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -21,8 +20,7 @@ const ImageRatio = ({
   return (
     <div
       className={cx("w-full relative", className)}
-      style={{ paddingTop: pt }}
-    >
+      style={{ paddingTop: pt }}>
       <img
         src={src}
         alt={alt}

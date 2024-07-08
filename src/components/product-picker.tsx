@@ -1,46 +1,27 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
 import { Box, Button, Icon, Sheet, Text } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import ImageRatio from "../components/img-ratio";
 import { useAddProductToCart, useResetProductPicked } from "../hooks";
 import { CartProduct, Product } from "../models";
-import {
-  cartState,
-  openProductPickerState,
-  productInfoPickedState,
-  storeState,
-} from "../state";
-import { convertPrice } from "../utils";
+import useStore from "../store";
 
 const ProductPicker = () => {
-  const { productId, isUpdate } = useRecoilValue(productInfoPickedState);
-  const [openSheet, setOpenSheet] = useRecoilState<boolean>(
-    openProductPickerState
-  );
+  const { productId, isUpdate } = useStore((state) => state.productInfoPicked);
+  const [openSheet, setOpenSheet] = useStore((state) => [
+    state.openProductPicker,
+    state.setOpenProductPicker,
+  ]);
   const [quantity, setQuantity] = useState<number>(1);
-  // const [selectedOptions, setSelectedOptions] = useState<
-  //   Record<string, any> | undefined
-  // >(undefined);
-  // const [note, setNote] = useState("");
-
-  const cart = useRecoilValue(cartState);
-  const btnRef = useRef<HTMLDivElement | null>(null);
-  const store = useRecoilValue(storeState);
+  const cart = useStore((state) => state.cart);
+  const store = useStore((state) => state.store);
   const sheet = useRef<any>(null);
 
   const resetProductPicker = useResetProductPicked();
   const addProductToCart = useAddProductToCart();
   const navigate = useNavigate();
-
-  // const resetOptions = () => {
-  //   setQuantity(1);
-  //   setNote("");
-  //   setSelectedOptions(undefined);
-  // };
 
   const product: Product | undefined = useMemo(() => {
     if (store) {
@@ -50,11 +31,11 @@ const ProductPicker = () => {
       return currentProduct;
     }
     return undefined;
-  }, [productId]);
+  }, [productId, store]);
 
   const cartProduct: CartProduct | undefined = useMemo(() => {
     if (product && cart) {
-      const currentProductOrder = cart.listOrder.find(
+      const currentProductOrder = cart.items.find(
         (ord) => ord.id === product.id
       );
 
@@ -66,31 +47,15 @@ const ProductPicker = () => {
   }, [product, cart]);
 
   useEffect(() => {
-    // if (product && product.options && !cartProduct) {
-    //   product.options.forEach((optProduct) => {
-    //     optProduct.option.forEach((opt) => {
-    //       if (opt.checked) {
-    //         setSelectedOptions((prev) => ({
-    //           ...prev,
-    //           [optProduct.name]: opt.value,
-    //         }));
-    //       }
-    //     });
-    //   });
-    // }
     if (cartProduct && openSheet) {
-      const { quantity } = cartProduct.order;
+      const { quantity } = cartProduct;
       setQuantity(quantity);
-      // setNote(note || "");
-      // setSelectedOptions((prev) => ({ ...prev, ...data }));
     }
   }, [product, cartProduct, openSheet]);
 
   const addToStore = async (callback?: () => void) => {
     const productOrder = {
       quantity,
-      // note,
-      // ...selectedOptions,
     };
 
     addProductToCart({
@@ -107,8 +72,6 @@ const ProductPicker = () => {
   const deleteProductInCart = () => {
     const productOrder = {
       quantity: 0,
-      // note,
-      // ...selectedOptions,
     };
     addProductToCart({
       productOrder: {
@@ -118,27 +81,6 @@ const ProductPicker = () => {
     });
     setOpenSheet(false);
   };
-
-  // const noteComponent = useMemo(
-  //   () => (
-  //     <>
-  //       <div className="title-type-picker">Ghi chú</div>
-  //       <div className="m-4">
-  //         <Input
-  //           type="text"
-  //           placeholder="Nhập ghi chú (VD. Ít đá, nhiều đường...)"
-  //           clearable
-  //           name="note"
-  //           value={note}
-  //           onChange={(e) => {
-  //             setNote(e.target.value);
-  //           }}
-  //         />
-  //       </div>
-  //     </>
-  //   ),
-  //   [note]
-  // );
 
   return (
     <>
@@ -151,13 +93,9 @@ const ProductPicker = () => {
           onClose={() => setOpenSheet(false)}
           afterClose={() => {
             resetProductPicker();
-            // resetOptions();
           }}
           ref={sheet}
-          autoHeight
-          // defaultSnapPoint={product.options.length > 0 ? 1 : 0}
-          // snapPoints={product.options.length > 0 ? [0.2, 0] : [0]}
-          title="Chọn chi tiết">
+          autoHeight>
           <div className="overflow-y-auto overflow-x-hidden pb-32">
             <div className="w-full flex flex-row items-center justify-between overflow-hidden h-24 m-4 ">
               <div className="flex flex-row items-center">
@@ -207,40 +145,6 @@ const ProductPicker = () => {
               </Box>
             </div>
 
-            {/* {selectedOptions &&
-              product.options?.map((option, index) => (
-                <div key={option.name}>
-                  <div className={cx("title-type-picker")}>{option.title}</div>
-                  <Radio.Group
-                    onChange={(val) => {
-                      setSelectedOptions((prev) => ({
-                        ...prev,
-                        [option.name]: val,
-                      }));
-                    }}
-                    defaultValue={selectedOptions?.[option.name] as string}
-                    name={option.name}>
-                    {option.option.map((type, indexType) => (
-                      <Box
-                        m={4}
-                        key={type.value}
-                        className={cx(
-                          indexType === 0 &&
-                            index === 1 &&
-                            "sheet-modal-swipe-step"
-                        )}>
-                        <Radio
-                          name={option.name}
-                          value={type.value}
-                          label={type.label}
-                        />
-                      </Box>
-                    ))}
-                  </Radio.Group>
-                </div>
-              ))} */}
-
-            {/* {noteComponent} */}
             <div className="title-type-picker h-5" />
             {createPortal(
               <ButtonFixed
