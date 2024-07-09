@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartProduct, LoginResponse, Product, ProductMenu, Store } from './models';
 
@@ -68,7 +68,6 @@ interface State {
     phoneNumber: string;
     location: string;
   } | null;
-  loginResponse: LoginResponse | null;
   paginationResponse: {
     content: any[];
     pageNo: number;
@@ -94,6 +93,7 @@ interface State {
   setStoreId: (storeId: string) => void;
   setUsername: (username: string) => void;
   setLocationSignup: (locationSignup: string) => void;
+  setLoginResponse: (loginResponse: LoginResponse | null) => void;
 }
 
 const useStore = create<State>()(
@@ -112,7 +112,6 @@ const useStore = create<State>()(
       activeCate: 0,
       activeFilter: 'az',
       storeProductResult: [],
-      
       openProductPicker: false,
       productInfoPicked: {
         productId: -1,
@@ -128,7 +127,6 @@ const useStore = create<State>()(
       order: null,
       storeDetails: null,
       storeUpdateRequest: null,
-      loginResponse: null,
       paginationResponse: null,
       responseObject: null,
       setHeader: (header) => set((state) => ({ header: { ...state.header, ...header } })),
@@ -139,7 +137,26 @@ const useStore = create<State>()(
       setStoreId: (storeId) => set({ storeId }),
       setUsername: (username) => set({ username }),
       setLocationSignup: (locationSignup) => set({ locationSignup }),
-    location: '',      setLocation: (location) => set({ location }),    }),    {      name: 'app-storage',    }
+      location: '',
+      setLocation: (location) => set({ location }),
+      loginResponse: null,
+      setLoginResponse: (loginResponse) => set({ loginResponse }),
+    }),
+    {
+      name: 'app-storage',
+      serialize: (state) => JSON.stringify(state, (key, value) => {
+        // Exclude React Fiber nodes to avoid circular references
+        if (value && value.$$typeof && value._owner) {
+          return undefined;
+        }
+        // Exclude any additional keys that are causing issues
+        if (key === '_context' || key.startsWith('__react')) {
+          return undefined;
+        }
+        return value;
+      }),
+      deserialize: (str) => JSON.parse(str),
+    }
   )
 );
 

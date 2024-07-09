@@ -17,7 +17,7 @@ const Signin: React.FunctionComponent = () => {
   const handleCustomerLogin = useCallback(async () => {
     try {
       const phoneNumber = "84333336938";
-      const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 10); // Example: 10 is the salt rounds
+      const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
 
       const zaloId = "3368637342326461234";
 
@@ -38,6 +38,7 @@ const Signin: React.FunctionComponent = () => {
         );
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
+        console.log(hashedPhoneNumber);
         navigate("/menu");
       } else {
         console.log(loginResponse.data.message);
