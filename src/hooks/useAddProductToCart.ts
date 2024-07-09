@@ -1,37 +1,40 @@
 import { useCallback } from 'react';
-import { CartProduct } from '../models';
+import { CartProductMenuResponse, CartRequest } from '../models';
+import api from '../services/api';
 import useStore from '../store';
 
 const useAddProductToCart = () => {
-  const { cart, setCart } = useStore((state) => state);
+  const { setCart } = useStore((state) => state);
 
   return useCallback(
-    ({ productOrder }: { productOrder: CartProduct }) => {
-      setCart((oldCart) => {
-        const cart = { ...oldCart };
-        const orderIndex = cart.items.findIndex(
-          (prod) => prod.id === productOrder.id
-        );
-        if (orderIndex >= 0) {
-          // available in cart
-          cart.items = [...cart.items];
-          if (productOrder.quantity === 0) {
-            // delete product in cart
-            cart.items.splice(orderIndex, 1);
-          } else {
-            cart.items.splice(orderIndex, 1, {
-              ...cart.items[orderIndex],
-              quantity: productOrder.quantity,
-            });
-          }
-        } else if (productOrder.quantity > 0) {
-          cart.items = cart.items.concat({ ...productOrder });
+    async (cartRequest: CartRequest) => {
+      try {
+        const response = await api.post<CartProductMenuResponse>('/carts', cartRequest);
+        if (response.data.isSuccess) {
+          setCart((oldCart) => {
+            const cart = { ...oldCart };
+            const orderIndex = cart.items.findIndex(
+              (prod) => prod.id === response.data.data.id
+            );
+            if (orderIndex >= 0) {
+              cart.items.splice(orderIndex, 1, {
+                ...cart.items[orderIndex],
+                quantity: response.data.data.quantity,
+              });
+            } else {
+              cart.items = cart.items.concat({ ...response.data.data });
+            }
+            cart.updatedDate = new Date().toISOString();
+            return cart;
+          });
+        } else {
+          console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", response.data.message);
         }
-        cart.updatedDate = new Date().toISOString();
-        return cart;
-      });
+      } catch (error) {
+        console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
+      }
     },
-    [cart, setCart]
+    [setCart]
   );
 };
 export default useAddProductToCart;

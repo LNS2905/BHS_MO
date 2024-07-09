@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Icon } from "zmp-ui";
+import api from "../../services/api";
 import useStore from "../../store";
 import { convertPrice } from "../../utils";
 import ImageRatio from "../img-ratio";
@@ -19,10 +20,38 @@ const CardProductHorizontal = ({
   salePrice,
   retailPrice,
 }: CardProductHorizontalProps) => {
-  const { setOpenProductPicker, setProductInfoPicked } = useStore(
+  const { setOpenProductPicker, setProductInfoPicked, fetchCart } = useStore(
     (state) => state
   );
   const navigate = useNavigate();
+
+  const handleAddToCart1 = async () => {
+    try {
+      const cartId = sessionStorage.getItem("cartId");
+      await addProductToCart({
+        cartProductMenuId: productId,
+        storeId: sessionStorage.getItem("storeId"),
+        cartId: cartId,
+        productId: productId,
+        quantity: 1,
+      });
+      setOpenProductPicker(true);
+      setProductInfoPicked({ productId, isUpdate: true });
+      fetchCart(Number(sessionStorage.getItem("storeId"))); // Gọi API lấy giỏ hàng sau khi thêm sản phẩm
+    } catch (error) {
+      console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
+    }
+  };
+
+  const addProductToCart = async (data: any) => {
+    try {
+      const response = await api.post("/carts", data);
+      console.log("Thêm sản phẩm vào giỏ hàng thành công:", response.data);
+    } catch (error) {
+      console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
+    }
+  };
+
   return (
     <div
       className="w-full flex flex-row items-center border border-[#E4E8EC] rounded-lg overflow-hidden h-24"
@@ -53,10 +82,7 @@ const CardProductHorizontal = ({
         className="flex-none">
         <div
           className="w-6 h-6 rounded-full bg-primary flex justify-center items-center"
-          onClick={() => {
-            setOpenProductPicker(true);
-            setProductInfoPicked({ productId });
-          }}
+          onClick={handleAddToCart1}
           role="button">
           <Icon icon="zi-plus" size={16} className="text-white" />
         </div>

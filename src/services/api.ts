@@ -6,13 +6,9 @@ const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const accessToken = sessionStorage.getItem("accessToken");
-  const storeId = sessionStorage.getItem("storeId");
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
-  // if (storeId) {
-  //   config.params = { ...config.params, storeId: storeId };
-  // }
   return config;
 });
 

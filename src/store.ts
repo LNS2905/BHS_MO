@@ -95,6 +95,8 @@ interface State {
   setUsername: (username: string) => void;
   setLocationSignup: (locationSignup: string) => void;
   setLoginResponse: (loginResponse: LoginResponse | null) => void;
+  setProductInfoPicked: (productInfoPicked: Partial<State['productInfoPicked']>) => void;
+  setOpenProductPicker: (openProductPicker: boolean) => void;
   fetchCart: (storeId: number | undefined) => void;
 }
 
