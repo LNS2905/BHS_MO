@@ -2,14 +2,11 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { Input, Page } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
-import CategoriesStore from "../components/categories-store";
 import CardProductHorizontal from "../components/custom-card/card-product-horizontal";
-import CardShop from "../components/custom-card/card-shop";
 import useStore from "../store";
 
 import { useNavigate } from "react-router-dom";
 import { getConfig } from "../components/config-provider";
-import { filter } from "../constants/referrence";
 import useSetHeader from "../hooks/useSetHeader";
 import { ProductMenu } from "../models";
 import { changeStatusBarColor } from "../services";
@@ -86,9 +83,10 @@ const MenuPage: React.FunctionComponent = () => {
 
   return (
     <Page>
-      {store && storeProductResult && (
+      {/* {store && storeProductResult && ( */}
+      {storeProductResult && (
         <>
-          <div className="bg-primary">
+          {/* <div className="bg-primary">
             <CardShop storeInfo={store} />
             <CategoriesStore
               categories={store.categories!}
@@ -99,7 +97,7 @@ const MenuPage: React.FunctionComponent = () => {
               filter={filter}
               quantity={storeProductResult.length}
             />
-          </div>
+          </div> */}
           <div className="bg-gray-100 h-3" />
           <div
             className="bg-white p-3"
