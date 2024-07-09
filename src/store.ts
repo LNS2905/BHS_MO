@@ -141,6 +141,7 @@ const useStore = create<State>()(
       setLocation: (location) => set({ location }),
       loginResponse: null,
       setLoginResponse: (loginResponse) => set({ loginResponse }),
+      setStoreProductResult: (storeProductResult) => set({ storeProductResult }),
     }),
     {
       name: 'app-storage',

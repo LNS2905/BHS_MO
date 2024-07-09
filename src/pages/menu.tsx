@@ -67,7 +67,9 @@ const MenuPage: React.FunctionComponent = () => {
           `/menu?page=${pageable.page}&size=${pageable.size}&storeId=${loginResponse?.storeId}`
         );
         if (response.data.isSuccess) {
+          console.log("Data Products: ", response.data.data.content);
           setStoreProductResult(response.data.data.content);
+          console.log("Menu:", storeProductResult);
         } else {
           console.error(
             "Lỗi khi lấy danh sách sản phẩm:",
