@@ -20,9 +20,8 @@ import Header from "./header";
 import ProductPicker from "./product-picker";
 
 const MyApp = () => {
-  const { loginResponse, storeId, setLoginResponse, setStoreId } = useStore(
-    (state) => state
-  );
+  const { loginResponse, storeId, setLoginResponse, setStoreId, fetchCart } =
+    useStore((state) => state);
 
   useEffect(() => {
     // Lưu lại accessToken và storeId sau khi đăng nhập thành công
@@ -38,8 +37,9 @@ const MyApp = () => {
         message: "",
       });
       setStoreId(storeIdFromSession);
+      fetchCart(Number(storeIdFromSession)); // Gọi API lấy giỏ hàng
     }
-  }, [setLoginResponse, setStoreId]);
+  }, [setLoginResponse, setStoreId, fetchCart]);
 
   return (
     <ConfigProvider

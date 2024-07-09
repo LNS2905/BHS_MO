@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartProduct, LoginResponse, Product, ProductMenu, Store } from './models';
+import api from './services/api';
 
 interface State {
   store: Store | null;
@@ -94,11 +95,12 @@ interface State {
   setUsername: (username: string) => void;
   setLocationSignup: (locationSignup: string) => void;
   setLoginResponse: (loginResponse: LoginResponse | null) => void;
+  fetchCart: (storeId: number | undefined) => void;
 }
 
 const useStore = create<State>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       store: null,
       products: [],
       cart: {
@@ -142,6 +144,19 @@ const useStore = create<State>()(
       loginResponse: null,
       setLoginResponse: (loginResponse) => set({ loginResponse }),
       setStoreProductResult: (storeProductResult) => set({ storeProductResult }),
+      fetchCart: async (storeId) => {
+        try {
+          const cartId = sessionStorage.getItem("cartId");
+          const response = await api.get<CartResponse>(`/carts/items?page=0&size=10&cartId=${cartId}`);
+          if (response.data.isSuccess) {
+            set({ cart: response.data.data });
+          } else {
+            console.error("Lỗi khi lấy giỏ hàng:", response.data.message);
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy giỏ hàng:", error);
+        }
+      },
     }),
     {
       name: 'app-storage',
