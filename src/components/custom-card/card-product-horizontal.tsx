@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Icon } from "zmp-ui";
-import api from "../../services/api";
+import ProductPickerSheet from "../../components/product-picker-sheet";
 import useStore from "../../store";
 import { convertPrice } from "../../utils";
 import ImageRatio from "../img-ratio";
@@ -13,6 +13,7 @@ type CardProductHorizontalProps = {
   salePrice: number | string;
   retailPrice: number | string;
 };
+
 const CardProductHorizontal = ({
   productId,
   pathImg,
@@ -20,36 +21,14 @@ const CardProductHorizontal = ({
   salePrice,
   retailPrice,
 }: CardProductHorizontalProps) => {
-  const { setOpenProductPicker, setProductInfoPicked, fetchCart } = useStore(
+  const { setOpenProductPicker, setProductInfoPicked } = useStore(
     (state) => state
   );
   const navigate = useNavigate();
 
-  const handleAddToCart1 = async () => {
-    try {
-      const cartId = sessionStorage.getItem("cartId");
-      await addProductToCart({
-        cartProductMenuId: productId,
-        storeId: sessionStorage.getItem("storeId"),
-        cartId: cartId,
-        productId: productId,
-        quantity: 1,
-      });
-      setOpenProductPicker(true);
-      setProductInfoPicked({ productId, isUpdate: true });
-      fetchCart(Number(sessionStorage.getItem("storeId"))); // Gọi API lấy giỏ hàng sau khi thêm sản phẩm
-    } catch (error) {
-      console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
-    }
-  };
-
-  const addProductToCart = async (data: any) => {
-    try {
-      const response = await api.post("/carts", data);
-      console.log("Thêm sản phẩm vào giỏ hàng thành công:", response.data);
-    } catch (error) {
-      console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
-    }
+  const handleOpenProductPicker = () => {
+    setOpenProductPicker(true);
+    setProductInfoPicked({ productId, isUpdate: false });
   };
 
   return (
@@ -82,11 +61,12 @@ const CardProductHorizontal = ({
         className="flex-none">
         <div
           className="w-6 h-6 rounded-full bg-primary flex justify-center items-center"
-          onClick={handleAddToCart1}
+          onClick={handleOpenProductPicker}
           role="button">
           <Icon icon="zi-plus" size={16} className="text-white" />
         </div>
       </Box>
+      <ProductPickerSheet />
     </div>
   );
 };

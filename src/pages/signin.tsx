@@ -39,6 +39,34 @@ const Signin: React.FunctionComponent = () => {
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
         console.log(hashedPhoneNumber);
+
+        //get cartId
+
+        const getCartByStoreId = async (storeId) => {
+          try {
+            const response = await api.get(`/carts?storeId=${storeId}`, {
+              headers: {
+                Authorization: `Bearer ${sessionStorage.getItem(
+                  "accessToken"
+                )}`,
+              },
+            });
+
+            if (response.data.isSuccess) {
+              sessionStorage.setItem("cartId", response.data.data.cartId);
+              console.log("Get cart successfully:", response.data);
+            } else {
+              console.log("Error getting cart:", response.data.message);
+            }
+          } catch (error) {
+            console.error("Error getting cart:", error);
+          }
+        };
+
+        // Call the getCartByStoreId function with the storeId
+        const storeId = sessionStorage.getItem("storeId");
+        getCartByStoreId(storeId);
+
         navigate("/menu");
       } else {
         console.log(loginResponse.data.message);

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { CartProduct, LoginResponse, Product, ProductMenu, Store } from './models';
+import { CartProduct, LoginResponse, PaginationResponse, Product, ProductMenu, ResponseObject, Store } from './models';
 import api from './services/api';
 
 interface State {
@@ -26,10 +26,12 @@ interface State {
   storeProductResult: ProductMenu[];
   location: string;
   openProductPicker: boolean;
+  setOpenProductPicker: (open: boolean) => void;
   productInfoPicked: {
     productId: number;
     isUpdate: boolean;
   };
+  setProductInfoPicked: (info: { productId: number; isUpdate: boolean }) => void;
   email: string;
   password: string;
   phoneNumber: string;
@@ -69,6 +71,8 @@ interface State {
     phoneNumber: string;
     location: string;
   } | null;
+  menu: ProductMenu[];
+  setMenu: (menu: ProductMenu[]) => void;
   paginationResponse: {
     content: any[];
     pageNo: number;
@@ -95,9 +99,8 @@ interface State {
   setUsername: (username: string) => void;
   setLocationSignup: (locationSignup: string) => void;
   setLoginResponse: (loginResponse: LoginResponse | null) => void;
-  setProductInfoPicked: (productInfoPicked: Partial<State['productInfoPicked']>) => void;
-  setOpenProductPicker: (openProductPicker: boolean) => void;
-  fetchCart: (storeId: number | undefined) => void;
+  fetchCart: () => Promise<void>;
+  setStoreProductResult: (storeProductResult: ProductMenu[]) => void;
 }
 
 const useStore = create<State>()(
@@ -117,10 +120,9 @@ const useStore = create<State>()(
       activeFilter: 'az',
       storeProductResult: [],
       openProductPicker: false,
-      productInfoPicked: {
-        productId: -1,
-        isUpdate: false,
-      },
+      setOpenProductPicker: (open) => set({ openProductPicker: open }),
+      productInfoPicked: { productId: -1, isUpdate: false },
+      setProductInfoPicked: (info) => set({ productInfoPicked: info }),
       email: '',
       password: '',
       phoneNumber: '',
@@ -131,6 +133,8 @@ const useStore = create<State>()(
       order: null,
       storeDetails: null,
       storeUpdateRequest: null,
+      menu: [],
+      setMenu: (menu) => set({ menu }),
       paginationResponse: null,
       responseObject: null,
       setHeader: (header) => set((state) => ({ header: { ...state.header, ...header } })),
@@ -146,33 +150,55 @@ const useStore = create<State>()(
       loginResponse: null,
       setLoginResponse: (loginResponse) => set({ loginResponse }),
       setStoreProductResult: (storeProductResult) => set({ storeProductResult }),
-      fetchCart: async (storeId) => {
+      fetchCart: async () => {
+        const cartId = sessionStorage.getItem('cartId');
+        if (!cartId) {
+          console.error('Cart ID not found in session storage');
+          return;
+        }
         try {
-          const cartId = sessionStorage.getItem("cartId");
-          const response = await api.get<CartResponse>(`/carts/items?page=0&size=10&cartId=${cartId}`);
+          const response = await api.get<ResponseObject<PaginationResponse<CartProduct>>>(`/carts/items`, {
+            params: {
+              page: 0,
+              size: 100,
+              cartId: parseInt(cartId),
+            },
+          });
           if (response.data.isSuccess) {
-            set({ cart: response.data.data });
+            set({ 
+              cart: {
+                ...get().cart,
+                items: response.data.data.content,
+              }
+            });
           } else {
-            console.error("Lỗi khi lấy giỏ hàng:", response.data.message);
+            console.error('Failed to fetch cart:', response.data.message);
           }
         } catch (error) {
-          console.error("Lỗi khi lấy giỏ hàng:", error);
+          console.error('Error fetching cart:', error);
         }
       },
     }),
     {
       name: 'app-storage',
-      serialize: (state) => JSON.stringify(state, (key, value) => {
-        // Exclude React Fiber nodes to avoid circular references
-        if (value && value.$$typeof && value._owner) {
-          return undefined;
-        }
-        // Exclude any additional keys that are causing issues
-        if (key === '_context' || key.startsWith('__react')) {
-          return undefined;
-        }
-        return value;
-      }),
+      serialize: (state) => {
+        const seen = new WeakSet();
+        return JSON.stringify(state, (key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+              return;
+            }
+            seen.add(value);
+          }
+          if (value && value.$$typeof && value._owner) {
+            return undefined;
+          }
+          if (key === '_context' || key.startsWith('__react')) {
+            return undefined;
+          }
+          return value;
+        });
+      },
       deserialize: (str) => JSON.parse(str),
     }
   )

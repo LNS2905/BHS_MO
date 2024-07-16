@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from "react";
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import {
   AnimationRoutes,
   App,
@@ -19,12 +19,16 @@ import { ConfigProvider, getConfig } from "./config-provider";
 import Header from "./header";
 import ProductPicker from "./product-picker";
 
+const PrivateRoute = ({ children }) => {
+  const { loginResponse } = useStore((state) => state);
+  return loginResponse?.isSuccess ? children : <Navigate to="/" />;
+};
+
 const MyApp = () => {
   const { loginResponse, storeId, setLoginResponse, setStoreId, fetchCart } =
     useStore((state) => state);
 
   useEffect(() => {
-    // Lưu lại accessToken và storeId sau khi đăng nhập thành công
     const accessToken = sessionStorage.getItem("accessToken");
     const storeIdFromSession = sessionStorage.getItem("storeId");
     if (accessToken && storeIdFromSession) {
@@ -37,7 +41,7 @@ const MyApp = () => {
         message: "",
       });
       setStoreId(storeIdFromSession);
-      fetchCart(Number(storeIdFromSession)); // Gọi API lấy giỏ hàng
+      fetchCart(Number(storeIdFromSession));
     }
   }, [setLoginResponse, setStoreId, fetchCart]);
 
@@ -52,7 +56,7 @@ const MyApp = () => {
       <App>
         <Suspense
           fallback={
-            <div className=" w-screen h-screen flex justify-center items-center">
+            <div className="w-screen h-screen flex justify-center items-center">
               <Spinner />
             </div>
           }>
@@ -60,18 +64,40 @@ const MyApp = () => {
             <ZMPRouter>
               <Header />
               <AnimationRoutes>
-                <Route path="/menu" element={<MenuPage></MenuPage>}></Route>
-                <Route path="/signup" element={<Signup></Signup>}></Route>
-                <Route path="/" element={<Signin></Signin>}></Route>
+                <Route path="/" element={<Signin />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route
+                  path="/menu"
+                  element={
+                    <PrivateRoute>
+                      <MenuPage />
+                    </PrivateRoute>
+                  }
+                />
                 <Route
                   path="/order-success"
-                  element={<OrderSuccess></OrderSuccess>}></Route>
+                  element={
+                    <PrivateRoute>
+                      <OrderSuccess />
+                    </PrivateRoute>
+                  }
+                />
                 <Route
                   path="/finish-order"
-                  element={<FinishOrder></FinishOrder>}></Route>
+                  element={
+                    <PrivateRoute>
+                      <FinishOrder />
+                    </PrivateRoute>
+                  }
+                />
                 <Route
                   path="/detail-product/:productId"
-                  element={<DetailProduct></DetailProduct>}></Route>
+                  element={
+                    <PrivateRoute>
+                      <DetailProduct />
+                    </PrivateRoute>
+                  }
+                />
               </AnimationRoutes>
               <ProductPicker />
             </ZMPRouter>
