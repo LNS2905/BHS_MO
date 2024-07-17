@@ -69,9 +69,9 @@ const MyApp = () => {
                 <Route
                   path="/menu"
                   element={
-                    <PrivateRoute>
-                      <MenuPage />
-                    </PrivateRoute>
+                    // <PrivateRoute>
+                    <MenuPage />
+                    // </PrivateRoute>
                   }
                 />
                 <Route

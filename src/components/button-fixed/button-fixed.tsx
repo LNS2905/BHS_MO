@@ -39,7 +39,7 @@ const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
               variant={btn.type}
               size="large"
               onClick={btn.onClick}
-              className={btn.className} // Sử dụng prop className
+              className={btn.className}
             >
               {btn.content}
             </Button>

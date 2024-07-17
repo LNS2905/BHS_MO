@@ -125,7 +125,8 @@ const Signin: React.FunctionComponent = () => {
             <Button
               type="highlight"
               onClick={handleCustomerLogin}
-              className="text-primary">
+              className="text-primary"
+            >
               Đăng nhập với vai trò store
             </Button>
           </div>
