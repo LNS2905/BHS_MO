@@ -4,7 +4,6 @@ import { Button, Sheet } from "zmp-ui";
 import api from "../../src/services/api";
 import useStore from "../store";
 import { convertPrice } from "../utils";
-import ButtonPriceFixed from "./button-fixed/button-price-fixed";
 import ImageRatio from "./img-ratio";
 
 const ProductPickerSheet: React.FC = () => {
@@ -127,16 +126,6 @@ const ProductPickerSheet: React.FC = () => {
         onClick={handleAddToCart}>
         Thêm vào giỏ hàng
       </Button>
-      {totalQuantity > 0 && (
-        <ButtonPriceFixed
-          quantity={totalQuantity}
-          totalPrice={totalPrice}
-          handleOnClick={() => {
-            handleClose();
-            navigate("/finish-order");
-          }}
-        />
-      )}
     </Sheet>
   );
 };

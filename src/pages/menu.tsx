@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input, Page } from "zmp-ui";
+import ButtonFixed from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
 import { getConfig } from "../components/config-provider";
 import CardProductHorizontal from "../components/custom-card/card-product-horizontal";
@@ -11,7 +12,9 @@ import api from "../services/api";
 import useStore from "../store";
 
 const MenuPage: React.FunctionComponent = () => {
-  const { setMenu, menu, setSearchProduct, cart } = useStore((state) => state);
+  const { setMenu, menu, setSearchProduct, cart, fetchCart } = useStore(
+    (state) => state
+  );
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
@@ -54,7 +57,7 @@ const MenuPage: React.FunctionComponent = () => {
         );
         if (response.data.isSuccess) {
           console.log("Data Products: ", response.data.data.content);
-          setMenu(response.data.data.content); // Lưu menu vào store
+          setMenu(response.data.data.content);
           console.log("Menu:", menu);
         } else {
           console.error(
@@ -68,7 +71,8 @@ const MenuPage: React.FunctionComponent = () => {
     };
 
     fetchProducts();
-  }, [setHeader, searchBar, setMenu]);
+    fetchCart(); // Fetch cart data when component mounts
+  }, [setHeader, searchBar, setMenu, fetchCart]);
 
   const { totalQuantity, totalPrice } = useMemo(() => {
     return cart.items.reduce(
@@ -102,13 +106,26 @@ const MenuPage: React.FunctionComponent = () => {
             ))}
           </div>
           {totalPrice > 0 && (
-            <ButtonPriceFixed
-              quantity={totalQuantity}
-              totalPrice={totalPrice}
-              // handleOnClick={() => {
-              //   navigate("/finish-order");
-              // }}
-            />
+            <>
+              <ButtonPriceFixed
+                quantity={totalQuantity}
+                totalPrice={totalPrice}
+              />
+              <ButtonFixed
+                listBtn={[
+                  {
+                    id: 1,
+                    content: "Hoàn tất đơn hàng",
+                    type: "primary",
+                    onClick: () => {
+                      navigate("/finish-order");
+                    },
+                    className: "bg-red-500 text-white", // Added class for red button
+                  },
+                ]}
+                zIndex={99}
+              />
+            </>
           )}
         </>
       )}

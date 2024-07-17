@@ -7,6 +7,7 @@ export type ButtonType = {
   content: string;
   onClick: (e?) => void;
   type: "primary" | "secondary";
+  className?: string; // Thêm prop className
 };
 
 type ButtonFixedProps = {
@@ -15,6 +16,7 @@ type ButtonFixedProps = {
   hidden?: boolean;
   zIndex?: Number;
 };
+
 const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
   (props, ref) => {
     const { children, listBtn, hidden, zIndex } = props;
@@ -24,10 +26,9 @@ const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
         p={4}
         className={cx(
           "bg-white fixed bottom-0 left-0 right-0 shadow-btn-fixed",
-          zIndex ? `$z-[${zIndex}]` : "z-[99999]",
+          zIndex ? `z-[${zIndex}]` : "z-[99999]",
           hidden && "anime-move-down"
         )}
-        // @ts-ignore
         ref={ref}>
         {children && <Box m={0}>{children}</Box>}
         <Box m={0} flex className="gap-4">
@@ -37,7 +38,9 @@ const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
               fullWidth
               variant={btn.type}
               size="large"
-              onClick={btn.onClick}>
+              onClick={btn.onClick}
+              className={btn.className} // Sử dụng prop className
+            >
               {btn.content}
             </Button>
           ))}

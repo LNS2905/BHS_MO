@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 import { Icon } from "zmp-ui";
-import { StoreTypeRef } from "../../constants/referrence";
 import { Store } from "../../models";
 import { cx } from "../../utils";
 
@@ -22,32 +21,30 @@ const CardStore = ({
   className?: string;
 }) => (
   <div
-    key={store.id}
     className={cx(
       "flex flex-row items-center justify-between w-full",
       hasBorderBottom && " border-b",
       className && className
     )}
     onClick={handleOnClick}
-    role="button"
-  >
+    role="button">
     <div className="flex flex-row items-center">
       <div className="w-auto flex-none">
         <img
-          src={store.logoStore}
+          src="https://mms.img.susercontent.com/25b7e43f3c5985a5773c430213155c4c"
           alt="product"
           className=" w-9 h-9 object-cover rounded-full bg-white"
         />
       </div>
       <div className=" p-3 pr-0">
         <div className="line-clamp-2 text-sm font-medium break-words">
-          {store.nameStore}
+          Bách Hóa Sỉ
         </div>
-        {type === "standard" && (
+        {/* {type === "standard" && (
           <span className=" pt-1 font-semibold text-sm text-gray-500">
             {StoreTypeRef[store.type]}
           </span>
-        )}
+        )} */}
       </div>
     </div>
     {hasRightSide &&
