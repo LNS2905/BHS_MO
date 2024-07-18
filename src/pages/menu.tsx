@@ -4,6 +4,7 @@ import ButtonFixed from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
 import { getConfig } from "../components/config-provider";
 import CardProductHorizontal from "../components/custom-card/card-product-horizontal";
+import CardShop from "../components/custom-card/card-shop";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { Pageable, PaginationResponse, ProductMenu } from "../models";
 import { changeStatusBarColor } from "../services";
@@ -70,7 +71,7 @@ const MenuPage: React.FunctionComponent = () => {
     };
 
     fetchProducts();
-    fetchCart(); // Fetch cart data when component mounts
+    fetchCart();
   }, [setHeader, searchBar, setMenu, fetchCart]);
 
   const { totalQuantity, totalPrice } = useMemo(() => {
@@ -88,6 +89,9 @@ const MenuPage: React.FunctionComponent = () => {
     <Page>
       {menu && menu.length > 0 && (
         <>
+          <div className="bg-primary">
+            <CardShop />
+          </div>
           <div className="bg-gray-100 h-3" />
           <div
             className="bg-white p-3"

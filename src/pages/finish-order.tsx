@@ -1,11 +1,14 @@
-import React, { SyntheticEvent, useEffect, useMemo } from "react";
-import { Box, Button, Input, Page, Text, useNavigate } from "zmp-ui";
+import { Calendar } from "antd";
+import type { Dayjs } from "dayjs";
+import React, { SyntheticEvent, useEffect, useMemo, useState } from "react";
+import { Box, Button, Page, Text, useNavigate } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import { getConfig } from "../components/config-provider";
 import CardProductOrder from "../components/custom-card/card-product-order";
 import CardStore from "../components/custom-card/card-store";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor, pay } from "../services";
+import api from "../services/api";
 import useStore from "../store";
 import { convertPrice } from "../utils";
 
@@ -16,9 +19,11 @@ const FinishOrder: React.FC = () => {
     setOpenProductPicker,
     setProductInfoPicked,
     fetchCart,
-    location,
-    setLocation,
+    storeId,
+    cartId,
+    fetchNewCart,
   } = useStore((state) => state);
+  const [deliveryTime, setDeliveryTime] = useState<string>("");
   const shippingFee = Number(
     getConfig((config) => config.template.shippingFee)
   );
@@ -39,7 +44,16 @@ const FinishOrder: React.FC = () => {
 
   const handlePayMoney = async (e: SyntheticEvent) => {
     e.preventDefault();
-    await pay(totalPrice);
+    try {
+      const paymentResult = await pay(totalPrice);
+      if (paymentResult) {
+        await postOrder("BANKING");
+        await fetchNewCart(storeId!);
+        navigate("/order-success");
+      }
+    } catch (error) {
+      console.error("Payment failed:", error);
+    }
   };
 
   const handleChooseProduct = (productId: number) => {
@@ -47,13 +61,38 @@ const FinishOrder: React.FC = () => {
     setProductInfoPicked({ productId, isUpdate: true });
   };
 
-  const handlePaySuccess = async (e: SyntheticEvent) => {
+  const handlePayCOD = async (e: SyntheticEvent) => {
     e.preventDefault();
-    setHeader("Đặt hàng thành công");
-    setTimeout(() => {
-      setHeader("");
+    try {
+      await postOrder("COD");
+      await fetchNewCart(storeId!);
       navigate("/order-success");
-    }, 1500);
+    } catch (error) {
+      console.error("COD order failed:", error);
+    }
+  };
+
+  const postOrder = async (payingMethod: "COD" | "BANKING") => {
+    try {
+      const response = await api.post("/orders", {
+        storeId,
+        cartId,
+        payingMethod,
+        deliveryTime,
+      });
+      if (response.data.isSuccess) {
+        console.log("Order placed successfully:", response.data);
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      throw error;
+    }
+  };
+
+  const onPanelChange = (value: Dayjs) => {
+    setDeliveryTime(value.format("YYYY-MM-DDTHH:mm:ss.SSS[Z]"));
   };
 
   useEffect(() => {
@@ -95,22 +134,10 @@ const FinishOrder: React.FC = () => {
           </Box>
           <Box m={0} px={4} className="bg-white">
             <Text size="large" bold className="border-b py-3 mb-0">
-              Địa chỉ giao hàng
+              Thời gian giao hàng
             </Text>
             <div className="py-3">
-              <Text
-                size="large"
-                bold
-                className="after:content-['_*'] after:text-primary after:align-middle">
-                Địa chỉ
-              </Text>
-              <Box className="relative" m={0}>
-                <Input
-                  placeholder="Nhập địa chỉ giao hàng"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-              </Box>
+              <Calendar fullscreen={false} onPanelChange={onPanelChange} />
             </div>
           </Box>
           {shippingFee > 0 && (
@@ -135,7 +162,7 @@ const FinishOrder: React.FC = () => {
           fullWidth
           style={{ marginBottom: "10px" }}
           className="bg-primary text-white rounded-lg h-12"
-          onClick={handlePaySuccess}>
+          onClick={handlePayCOD}>
           Thanh toán COD
         </Button>
         <Button

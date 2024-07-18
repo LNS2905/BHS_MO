@@ -1,17 +1,15 @@
 import React from "react";
 import { openChat } from "zmp-sdk";
 import { Button, Icon } from "zmp-ui";
-import { DEFAULT_OA_ID } from "../../constants";
-import { Store } from "../../models";
 import { getConfig } from "../config-provider";
 
-const CardShop = ({ storeInfo }: { storeInfo: Store }) => {
+const CardShop = () => {
   const handleOpenChat = () => {
     const oaId: string = getConfig((c) => c.template.oaIDtoOpenChat || "");
 
     openChat({
       type: "oa",
-      id: oaId || DEFAULT_OA_ID,
+      id: "3845899341339907617",
     });
   };
 
@@ -40,6 +38,7 @@ const CardShop = ({ storeInfo }: { storeInfo: Store }) => {
         className="chat-button"
         variant="primary"
         size="small"
+        style={{ backgroundColor: "red" }}
         onClick={handleOpenChat}>
         Nhắn tin
       </Button>

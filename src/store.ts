@@ -99,21 +99,19 @@ interface State {
   setLoginResponse: (loginResponse: LoginResponse | null) => void;
   fetchCart: () => Promise<void>;
   setStoreProductResult: (storeProductResult: ProductMenu[]) => void;
-
-  // New states
   accessToken: string | null;
   refreshToken: string | null;
   storeId: string | null;
   cartId: string | null;
   isLoggedIn: boolean;
-
-  // New actions
-  setAccessToken: (token: string | null) => void;
-  setRefreshToken: (token: string | null) => void;
-  setStoreId: (id: string | null) => void;
-  setCartId: (id: string | null) => void;
+  setAccessToken: (accessToken: string | null) => void;
+  setRefreshToken: (refreshToken: string | null) => void;
+  setStoreId: (storeId: string | null) => void;
+  setCartId: (cartId: string | null) => void;
   setIsLoggedIn: (status: boolean) => void;
   logout: () => void;
+  // Thêm action mới vào State interface
+  fetchNewCart: (storeId: string) => Promise<void>;
 }
 
 const useStore = create<State>()(
@@ -140,7 +138,6 @@ const useStore = create<State>()(
       password: '',
       phoneNumber: '',
       name: '',
-      storeId: '',
       username: '',
       locationSignup: '',
       order: null,
@@ -163,9 +160,9 @@ const useStore = create<State>()(
       setLoginResponse: (loginResponse) => set({ loginResponse }),
       setStoreProductResult: (storeProductResult) => set({ storeProductResult }),
       fetchCart: async () => {
-        const cartId = sessionStorage.getItem('cartId');
+        const cartId = get().cartId;
         if (!cartId) {
-          console.error('Cart ID not found in session storage');
+          console.error('Cart ID not found in Zustand!');
           return;
         }
         try {
@@ -190,8 +187,6 @@ const useStore = create<State>()(
           console.error('Error fetching cart:', error);
         }
       },
-
-      // New states and actions
       accessToken: null,
       refreshToken: null,
       storeId: null,
@@ -209,6 +204,20 @@ const useStore = create<State>()(
         cartId: null,
         isLoggedIn: false
       }),
+      fetchNewCart: async (storeId) => {
+        try {
+          const response = await api.get<ResponseObject<{ cartId: number }>>('/carts', {
+            params: { storeId },
+          });
+          if (response.data.isSuccess) {
+            set({ cartId: response.data.data.cartId.toString() });
+          } else {
+            console.error('Failed to fetch new cart:', response.data.message);
+          }
+        } catch (error) {
+          console.error('Error fetching new cart:', error);
+        }
+      },
     }),
     {
       name: 'app-storage',

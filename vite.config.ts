@@ -1,5 +1,5 @@
-import { defineConfig } from "vite";
 import reactRefresh from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default () => {
@@ -9,6 +9,7 @@ export default () => {
     plugins: [reactRefresh()],
     build: {
       polyfillModulePreload: false,
+      target: "esnext",
     },
   });
 };
