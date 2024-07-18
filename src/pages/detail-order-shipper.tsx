@@ -1,3 +1,4 @@
+import { Image } from "antd";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Page, Text, useSnackbar } from "zmp-ui";
@@ -153,7 +154,7 @@ const OrderDetailShipper: React.FC = () => {
           </Text>
           {orderDetail.orderProductMenu.map((item) => (
             <Box key={item.id} className="mb-2">
-              <img
+              <Image
                 src={item.url}
                 alt={item.productName}
                 className="w-20 h-20 object-cover rounded-lg mr-2"

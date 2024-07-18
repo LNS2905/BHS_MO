@@ -1,11 +1,20 @@
 import React, { useEffect } from "react";
-import { Box, Button, Icon, Page, Text, useNavigate } from "zmp-ui"; // Updated import for useNavigate
+import {
+  Box,
+  Button,
+  Icon,
+  Page,
+  Text,
+  useNavigate,
+  useSnackbar,
+} from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
 
 const OrderSuccess: React.FC = () => {
   const navigate = useNavigate();
   const setHeader = useSetHeader();
+  const { openSnackbar } = useSnackbar();
 
   useEffect(() => {
     setHeader({
@@ -14,6 +23,10 @@ const OrderSuccess: React.FC = () => {
       type: "secondary",
     });
     changeStatusBarColor("secondary");
+    openSnackbar({
+      text: "Order placed successfully",
+      type: "success",
+    });
   }, []);
 
   const handleGoToMenu = () => {

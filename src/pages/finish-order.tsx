@@ -1,7 +1,7 @@
 import { Calendar } from "antd";
 import type { Dayjs } from "dayjs";
 import React, { SyntheticEvent, useEffect, useMemo, useState } from "react";
-import { Box, Button, Page, Text, useNavigate } from "zmp-ui";
+import { Box, Button, Page, Text, useNavigate, useSnackbar } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import { getConfig } from "../components/config-provider";
 import CardProductOrder from "../components/custom-card/card-product-order";
@@ -27,6 +27,7 @@ const FinishOrder: React.FC = () => {
   const shippingFee = Number(
     getConfig((config) => config.template.shippingFee)
   );
+  const { openSnackbar } = useSnackbar();
 
   const navigate = useNavigate();
   const setHeader = useSetHeader();
@@ -50,9 +51,17 @@ const FinishOrder: React.FC = () => {
         await postOrder("BANKING");
         await fetchNewCart(storeId!);
         navigate("/order-success");
+        openSnackbar({
+          text: "Payment successful",
+          type: "success",
+        });
       }
     } catch (error) {
       console.error("Payment failed:", error);
+      openSnackbar({
+        text: "Payment failed",
+        type: "error",
+      });
     }
   };
 
@@ -67,8 +76,16 @@ const FinishOrder: React.FC = () => {
       await postOrder("COD");
       await fetchNewCart(storeId!);
       navigate("/order-success");
+      openSnackbar({
+        text: "COD order placed successfully",
+        type: "success",
+      });
     } catch (error) {
       console.error("COD order failed:", error);
+      openSnackbar({
+        text: "Failed to place COD order",
+        type: "error",
+      });
     }
   };
 
@@ -82,11 +99,19 @@ const FinishOrder: React.FC = () => {
       });
       if (response.data.isSuccess) {
         console.log("Order placed successfully:", response.data);
+        openSnackbar({
+          text: "Order placed successfully",
+          type: "success",
+        });
       } else {
         throw new Error(response.data.message);
       }
     } catch (error) {
       console.error("Error placing order:", error);
+      openSnackbar({
+        text: `Error placing order: ${error.message}`,
+        type: "error",
+      });
       throw error;
     }
   };
