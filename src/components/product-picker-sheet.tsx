@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Sheet } from "zmp-ui";
+import { Box, Button, Sheet } from "zmp-ui";
 import api from "../../src/services/api";
 import useStore from "../store";
 import { convertPrice } from "../utils";
@@ -14,12 +14,12 @@ const ProductPickerSheet: React.FC = () => {
     setProductInfoPicked,
     menu,
     cart,
-    setCart,
     fetchCart,
+    cartId,
+    storeId,
   } = useStore((state) => state);
 
   const [quantity, setQuantity] = useState(1);
-  const [note, setNote] = useState("");
   const navigate = useNavigate();
 
   const selectedProduct = useMemo(() => {
@@ -29,12 +29,20 @@ const ProductPickerSheet: React.FC = () => {
     return null;
   }, [productInfoPicked.productId, menu]);
 
-  useEffect(() => {
+  const cartProduct = useMemo(() => {
     if (selectedProduct) {
-      setQuantity(1);
-      setNote("");
+      return cart.items.find((item) => item.product.id === selectedProduct.id);
     }
-  }, [selectedProduct]);
+    return null;
+  }, [selectedProduct, cart]);
+
+  useEffect(() => {
+    if (selectedProduct && cartProduct) {
+      setQuantity(cartProduct.quantity);
+    } else {
+      setQuantity(1);
+    }
+  }, [selectedProduct, cartProduct]);
 
   const handleClose = useCallback(() => {
     setOpenProductPicker(false);
@@ -42,11 +50,9 @@ const ProductPickerSheet: React.FC = () => {
   }, [setOpenProductPicker, setProductInfoPicked]);
 
   const handleAddToCart = useCallback(async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !cartId || !storeId) return;
 
     try {
-      const cartId = sessionStorage.getItem("cartId");
-      const storeId = sessionStorage.getItem("storeId");
       const response = await api.post("/carts", {
         cartProductMenuId: selectedProduct.id,
         storeId: parseInt(storeId),
@@ -57,7 +63,7 @@ const ProductPickerSheet: React.FC = () => {
 
       if (response.data.isSuccess) {
         console.log("Thêm vào giỏ hàng thành công:", response.data);
-        await fetchCart(parseInt(cartId));
+        await fetchCart();
         handleClose();
       } else {
         console.error("Lỗi khi thêm vào giỏ hàng:", response.data.message);
@@ -65,18 +71,71 @@ const ProductPickerSheet: React.FC = () => {
     } catch (error) {
       console.error("Lỗi khi thêm vào giỏ hàng:", error);
     }
-  }, [selectedProduct, quantity, fetchCart, handleClose]);
+  }, [selectedProduct, quantity, fetchCart, handleClose, cartId, storeId]);
 
-  const { totalQuantity, totalPrice } = useMemo(() => {
-    return cart.items.reduce(
-      (acc, item) => {
-        acc.totalQuantity += item.quantity;
-        acc.totalPrice += (item.product.price || 0) * item.quantity;
-        return acc;
-      },
-      { totalQuantity: 0, totalPrice: 0 }
-    );
-  }, [cart.items]);
+  const handleUpdateCart = useCallback(async () => {
+    if (!selectedProduct || !cartProduct || !cartId || !storeId) return;
+
+    try {
+      const response = await api.put("/carts/item", {
+        cartProductMenuId: cartProduct.id,
+        storeId: parseInt(storeId),
+        cartId: parseInt(cartId),
+        productId: selectedProduct.id,
+        quantity: quantity,
+      });
+
+      if (response.data.isSuccess) {
+        console.log("Cập nhật giỏ hàng thành công:", response.data);
+        await fetchCart();
+        handleClose();
+      } else {
+        console.error("Lỗi khi cập nhật giỏ hàng:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật giỏ hàng:", error);
+    }
+  }, [
+    selectedProduct,
+    cartProduct,
+    quantity,
+    fetchCart,
+    handleClose,
+    cartId,
+    storeId,
+  ]);
+
+  const handleDeleteFromCart = useCallback(async () => {
+    if (!cartProduct || !cartId || !storeId) return;
+
+    try {
+      const response = await api.delete("/carts/item", {
+        data: {
+          itemId: cartProduct.id,
+          cartId: parseInt(cartId),
+          storeId: parseInt(storeId),
+        },
+      });
+
+      if (response.data.isSuccess) {
+        console.log("Xóa sản phẩm khỏi giỏ hàng thành công:", response.data);
+        await fetchCart();
+        handleClose();
+      } else {
+        console.error(
+          "Lỗi khi xóa sản phẩm khỏi giỏ hàng:",
+          response.data.message
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm khỏi giỏ hàng:", error);
+    }
+  }, [cartProduct, fetchCart, handleClose, cartId, storeId]);
+
+  const handleCheckout = useCallback(() => {
+    navigate("/finish-order");
+    handleClose();
+  }, [navigate, handleClose]);
 
   if (!selectedProduct) {
     return null;
@@ -119,13 +178,45 @@ const ProductPickerSheet: React.FC = () => {
           />
         </div>
       </div>
-      <Button
-        fullWidth
-        className="mt-4"
-        style={{ backgroundColor: "red", color: "white" }}
-        onClick={handleAddToCart}>
-        Thêm vào giỏ hàng
-      </Button>
+      <Box m={0} flex justifyContent="space-between" pb={4}>
+        <div className="text-sm">Tổng tiền</div>
+        <div className="text-lg font-medium text-primary">
+          {convertPrice(quantity * selectedProduct.price)} VNĐ
+        </div>
+      </Box>
+      <Box m={4} flex justifyContent="space-between" gap={2}>
+        {productInfoPicked.isUpdate ? (
+          <>
+            <Button
+              fullWidth
+              className="flex-1 bg-pink-100 text-red-500 border border-red-500"
+              onClick={handleDeleteFromCart}>
+              Xóa sản phẩm
+            </Button>
+            <Button
+              fullWidth
+              className="flex-1 bg-red-500 text-white"
+              onClick={handleUpdateCart}>
+              Cập nhật
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              fullWidth
+              className="flex-1 bg-pink-100 text-red-500 border border-red-500"
+              onClick={handleCheckout}>
+              Thanh toán
+            </Button>
+            <Button
+              fullWidth
+              className="flex-1 bg-red-500 text-white"
+              onClick={handleAddToCart}>
+              Thêm vào giỏ
+            </Button>
+          </>
+        )}
+      </Box>
     </Sheet>
   );
 };

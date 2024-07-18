@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Input, Page } from "zmp-ui";
+import { Input, Page, useNavigate } from "zmp-ui"; // Updated import for useNavigate
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
 import { getConfig } from "../components/config-provider";
 import CardProductHorizontal from "../components/custom-card/card-product-horizontal";
-import useSetHeader from "../hooks/useSetHeader";
+import useSetHeader from "../components/hooks/useSetHeader";
 import { Pageable, PaginationResponse, ProductMenu } from "../models";
 import { changeStatusBarColor } from "../services";
 import api from "../services/api";
@@ -77,7 +76,7 @@ const MenuPage: React.FunctionComponent = () => {
   const { totalQuantity, totalPrice } = useMemo(() => {
     return cart.items.reduce(
       (acc, item) => {
-        acc.totalQuantity += item.quantity;
+        acc.totalQuantity += 1;
         acc.totalPrice += (item.product.price || 0) * item.quantity;
         return acc;
       },
@@ -120,7 +119,7 @@ const MenuPage: React.FunctionComponent = () => {
                     onClick: () => {
                       navigate("/finish-order");
                     },
-                    className: "bg-red-500 text-white", // Added class for red button
+                    className: "bg-red-500 text-white",
                   },
                 ]}
                 zIndex={99}

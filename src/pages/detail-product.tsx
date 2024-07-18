@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"; // Updated import for useNavigate
 import { openShareSheet } from "zmp-sdk";
 import { Box, Icon, Page } from "zmp-ui";
 import ButtonFixed, {
   ButtonType,
 } from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
-import useSetHeader from "../hooks/useSetHeader";
+import useSetHeader from "../components/hooks/useSetHeader";
 import { Product } from "../models";
 import { changeStatusBarColor } from "../services";
 import useStore from "../store";
@@ -20,14 +20,15 @@ const DetailProduct = () => {
     setOpenProductPicker,
     setProductInfoPicked,
   } = useStore((state) => state);
-  let { productId } = useParams();
-
   const navigate = useNavigate();
+  const { productId } = useParams(); // Use useParams to get productId from URL
+
   const setHeader = useSetHeader();
 
   const product: Product | undefined = useMemo(() => {
-    if (store) {
-      const currentProduct = store.listProducts.find(
+    if (store && store.products) {
+      // Updated to match the structure in store.ts
+      const currentProduct = store.products.find(
         (item) => item.id === Number(productId)
       );
       return currentProduct;
@@ -36,7 +37,10 @@ const DetailProduct = () => {
   }, [productId, store]);
 
   const salePercentage = useMemo(
-    () => calcSalePercentage(product?.salePrice!, product?.retailPrice!),
+    () =>
+      product && product.salePrice && product.retailPrice
+        ? calcSalePercentage(product.salePrice, product.retailPrice)
+        : undefined,
     [product]
   );
 
@@ -50,7 +54,7 @@ const DetailProduct = () => {
         setProductInfoPicked({ productId: Number(productId), isUpdate: true });
       },
     }),
-    [product, store, productId]
+    [productId]
   );
 
   const btnPayment: ButtonType = useMemo(
@@ -80,9 +84,9 @@ const DetailProduct = () => {
               type: "zmp",
               data: {
                 path: "/",
-                title: product?.nameProduct,
+                title: product?.name,
                 description: product?.description.slice(0, 100),
-                thumbnail: product?.imgProduct,
+                thumbnail: product?.img,
               },
             })
           }>
@@ -91,7 +95,8 @@ const DetailProduct = () => {
       ),
     });
     changeStatusBarColor();
-  }, []);
+  }, [product, setHeader]);
+
   return (
     <Page>
       <div
@@ -99,14 +104,14 @@ const DetailProduct = () => {
         style={{ paddingBottom: cartTotalPrice > 0 ? "120px" : "80px" }}>
         {product && (
           <>
-            <img src={product.imgProduct} alt="" className="w-full h-auto" />
+            <img src={product.img} alt="" className="w-full h-auto" />
             {salePercentage && (
               <div className="absolute top-2.5 right-2.5 text-white font-medium text-sm px-2 py-1 bg-[#FF9743] w-auto h-auto rounded-lg">
                 -{salePercentage}%
               </div>
             )}
             <Box m={0} p={4} className="border-b">
-              <div className=" text-lg">{product?.nameProduct}</div>
+              <div className=" text-lg">{product.name}</div>
               <span className=" pt-1 font-semibold text-base text-primary">
                 <span className=" font-normal text-xs text-primary">đ</span>
                 {convertPrice(product.salePrice)}
@@ -128,7 +133,7 @@ const DetailProduct = () => {
 
       {!!cartTotalPrice && (
         <ButtonPriceFixed
-          quantity={cart.listOrder.length}
+          quantity={cart.items.length} // Updated to match the structure in store.ts
           totalPrice={cartTotalPrice}
           handleOnClick={() => navigate("/finish-order")}
         />

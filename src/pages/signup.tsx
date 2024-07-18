@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Updated import for useNavigate
 import { Button, Input, Page, Text } from "zmp-ui";
-import useSetHeader from "../hooks/useSetHeader";
+import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
 import api from "../services/api";
 import useStore from "../store";
@@ -22,7 +22,6 @@ const Signup: React.FunctionComponent = () => {
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
-  // Lưu trữ thông tin người dùng vào store
   useEffect(() => {
     setName("");
     setLocation("");
@@ -33,11 +32,6 @@ const Signup: React.FunctionComponent = () => {
     async (event) => {
       event.preventDefault();
 
-      // // Hash số điện thoại bằng bcryptjs
-      // const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
-      const phoneNumber = "84333336938";
-
-      // Gọi API đăng ký
       const response = await api.post<SignupResponse>("/auth/zalo/signup", {
         name,
         location,
@@ -59,7 +53,7 @@ const Signup: React.FunctionComponent = () => {
         console.log(response.data);
       }
     },
-    [name, location, phoneNumber]
+    [name, location, phoneNumber, navigate]
   );
 
   const handleGoToSignin = useCallback(() => {
@@ -89,7 +83,7 @@ const Signup: React.FunctionComponent = () => {
           <div className="mb-4">
             <Input
               type="text"
-              placeholder="Tên người dùng"
+              placeholder="Tên cửa hàng"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="cus-input-search"
@@ -101,6 +95,15 @@ const Signup: React.FunctionComponent = () => {
               placeholder="Địa chỉ"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              className="cus-input-search"
+            />
+          </div>
+          <div className="mb-4">
+            <Input
+              type="tel"
+              placeholder="Số điện thoại"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               className="cus-input-search"
             />
           </div>

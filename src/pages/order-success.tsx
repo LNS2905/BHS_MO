@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, Icon, Page, Text } from "zmp-ui";
-import useSetHeader from "../hooks/useSetHeader";
+import { Box, Button, Icon, Page, Text, useNavigate } from "zmp-ui"; // Updated import for useNavigate
+import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
 
 const OrderSuccess: React.FC = () => {
@@ -36,9 +35,9 @@ const OrderSuccess: React.FC = () => {
             <Button
               type="primary"
               className="mt-6"
+              style={{ backgroundColor: "red" }}
               onClick={handleGoToMenu}
-              fullWidth
-            >
+              fullWidth>
               Tiếp tục mua sắm
             </Button>
           </div>

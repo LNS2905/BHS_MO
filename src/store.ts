@@ -36,7 +36,6 @@ interface State {
   password: string;
   phoneNumber: string;
   name: string;
-  storeId: string;
   username: string;
   locationSignup: string;
   order: {
@@ -95,12 +94,26 @@ interface State {
   setPhoneNumber: (phoneNumber: string) => void;
   setLocation: (location: string) => void;
   setName: (name: string) => void;
-  setStoreId: (storeId: string) => void;
   setUsername: (username: string) => void;
   setLocationSignup: (locationSignup: string) => void;
   setLoginResponse: (loginResponse: LoginResponse | null) => void;
   fetchCart: () => Promise<void>;
   setStoreProductResult: (storeProductResult: ProductMenu[]) => void;
+
+  // New states
+  accessToken: string | null;
+  refreshToken: string | null;
+  storeId: string | null;
+  cartId: string | null;
+  isLoggedIn: boolean;
+
+  // New actions
+  setAccessToken: (token: string | null) => void;
+  setRefreshToken: (token: string | null) => void;
+  setStoreId: (id: string | null) => void;
+  setCartId: (id: string | null) => void;
+  setIsLoggedIn: (status: boolean) => void;
+  logout: () => void;
 }
 
 const useStore = create<State>()(
@@ -142,7 +155,6 @@ const useStore = create<State>()(
       setPassword: (password) => set({ password }),
       setPhoneNumber: (phoneNumber) => set({ phoneNumber }),
       setName: (name) => set({ name }),
-      setStoreId: (storeId) => set({ storeId }),
       setUsername: (username) => set({ username }),
       setLocationSignup: (locationSignup) => set({ locationSignup }),
       location: '',
@@ -178,6 +190,25 @@ const useStore = create<State>()(
           console.error('Error fetching cart:', error);
         }
       },
+
+      // New states and actions
+      accessToken: null,
+      refreshToken: null,
+      storeId: null,
+      cartId: null,
+      isLoggedIn: false,
+      setAccessToken: (token) => set({ accessToken: token }),
+      setRefreshToken: (token) => set({ refreshToken: token }),
+      setStoreId: (id) => set({ storeId: id }),
+      setCartId: (id) => set({ cartId: id }),
+      setIsLoggedIn: (status) => set({ isLoggedIn: status }),
+      logout: () => set({
+        accessToken: null,
+        refreshToken: null,
+        storeId: null,
+        cartId: null,
+        isLoggedIn: false
+      }),
     }),
     {
       name: 'app-storage',

@@ -20,13 +20,9 @@ export type Options = {
 
 export type CartProduct = {
   id: number;
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    imageUrl: string;
-  };
+  product: Product;
   quantity: number;
+  price: number;
 };
 
 export type Product = {
@@ -38,6 +34,7 @@ export type Product = {
   urlImage: string;
   categoryCode: string;
   categoryName: string;
+  price: number;
 };
 
 export type Store = {

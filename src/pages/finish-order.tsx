@@ -1,11 +1,10 @@
-import React, { SyntheticEvent, useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, Input, Page, Text } from "zmp-ui";
+import React, { SyntheticEvent, useEffect, useMemo } from "react";
+import { Box, Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import { getConfig } from "../components/config-provider";
 import CardProductOrder from "../components/custom-card/card-product-order";
 import CardStore from "../components/custom-card/card-store";
-import useSetHeader from "../hooks/useSetHeader";
+import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor, pay } from "../services";
 import useStore from "../store";
 import { convertPrice } from "../utils";
@@ -30,7 +29,7 @@ const FinishOrder: React.FC = () => {
   const { totalQuantity, totalPrice } = useMemo(() => {
     return cart.items.reduce(
       (acc, item) => {
-        acc.totalQuantity += item.quantity;
+        acc.totalQuantity += 1;
         acc.totalPrice += (item.product.price || 0) * item.quantity;
         return acc;
       },
@@ -78,11 +77,11 @@ const FinishOrder: React.FC = () => {
           <Box mx={3} mb={2}>
             {cart.items.map((item) => (
               <CardProductOrder
-                pathImg={item.product.urlImage}
-                nameProduct={item.product.name}
+                key={item.id}
+                pathImg={item.product.product.urlImage}
+                nameProduct={item.product.product.name}
                 salePrice={item.product.price}
                 quantity={item.quantity}
-                key={item.product.id}
                 id={item.product.id}
                 handleOnClick={(productId) => handleChooseProduct(productId)}
               />
@@ -102,8 +101,7 @@ const FinishOrder: React.FC = () => {
               <Text
                 size="large"
                 bold
-                className="after:content-['_*'] after:text-primary after:align-middle"
-              >
+                className="after:content-['_*'] after:text-primary after:align-middle">
                 Địa chỉ
               </Text>
               <Box className="relative" m={0}>
@@ -137,16 +135,14 @@ const FinishOrder: React.FC = () => {
           fullWidth
           style={{ marginBottom: "10px" }}
           className="bg-primary text-white rounded-lg h-12"
-          onClick={handlePaySuccess}
-        >
+          onClick={handlePaySuccess}>
           Thanh toán COD
         </Button>
         <Button
           htmlType="submit"
           fullWidth
           className="bg-primary text-white rounded-lg h-12"
-          onClick={handlePayMoney}
-        >
+          onClick={handlePayMoney}>
           Thanh toán banking
         </Button>
       </ButtonFixed>

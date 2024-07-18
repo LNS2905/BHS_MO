@@ -1,16 +1,24 @@
-import bcrypt from "bcryptjs"; // Import bcryptjs correctly
-
+import bcrypt from "bcryptjs";
 import React, { useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Updated import for useNavigate
 import { Button, Input, Page, Text } from "zmp-ui";
-import useSetHeader from "../hooks/useSetHeader";
+import useSetHeader from "../components/hooks/useSetHeader";
 import { LoginResponse } from "../models";
 import { changeStatusBarColor } from "../services";
 import api from "../services/api";
 import useStore from "../store";
 
 const Signin: React.FunctionComponent = () => {
-  const { email, setEmail, password, setPassword } = useStore((state) => state);
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    setAccessToken,
+    setStoreId,
+    setIsLoggedIn,
+    setCartId,
+  } = useStore((state) => state);
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
@@ -21,39 +29,29 @@ const Signin: React.FunctionComponent = () => {
 
       const zaloId = "3368637342326461234";
 
-      // Call login API with customer role
       const loginResponse = await api.post<LoginResponse>("/auth/zalo/login", {
         zaloId: zaloId,
         hashPhone: hashedPhoneNumber,
       });
 
       if (loginResponse.data.isSuccess) {
-        sessionStorage.setItem(
-          "accessToken",
-          loginResponse.data.data.accessToken
-        );
-        sessionStorage.setItem(
-          "storeId",
-          loginResponse.data.data.storeId.toString()
-        );
+        setAccessToken(loginResponse.data.data.accessToken);
+        setStoreId(loginResponse.data.data.storeId.toString());
+        setIsLoggedIn(true);
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
         console.log(hashedPhoneNumber);
-
-        //get cartId
 
         const getCartByStoreId = async (storeId) => {
           try {
             const response = await api.get(`/carts?storeId=${storeId}`, {
               headers: {
-                Authorization: `Bearer ${sessionStorage.getItem(
-                  "accessToken"
-                )}`,
+                Authorization: `Bearer ${loginResponse.data.data.accessToken}`,
               },
             });
 
             if (response.data.isSuccess) {
-              sessionStorage.setItem("cartId", response.data.data.cartId);
+              setCartId(response.data.data.cartId);
               console.log("Get cart successfully:", response.data);
             } else {
               console.log("Error getting cart:", response.data.message);
@@ -63,9 +61,7 @@ const Signin: React.FunctionComponent = () => {
           }
         };
 
-        // Call the getCartByStoreId function with the storeId
-        const storeId = sessionStorage.getItem("storeId");
-        getCartByStoreId(storeId);
+        getCartByStoreId(loginResponse.data.data.storeId);
 
         navigate("/menu");
       } else {
@@ -74,11 +70,7 @@ const Signin: React.FunctionComponent = () => {
     } catch (error) {
       console.log("error:", error);
     }
-  }, []);
-
-  const handleGoToSignup = useCallback(() => {
-    navigate("/signup");
-  }, [navigate]);
+  }, [setAccessToken, setStoreId, setIsLoggedIn, setCartId, navigate]);
 
   useEffect(() => {
     setHeader({
@@ -125,14 +117,13 @@ const Signin: React.FunctionComponent = () => {
             <Button
               type="highlight"
               onClick={handleCustomerLogin}
-              className="text-primary"
-            >
+              className="text-primary">
               Đăng nhập với vai trò store
             </Button>
           </div>
           <p className="mt-4 text-center">
             Chưa có tài khoản?{" "}
-            <a style={{ color: "blue" }} onClick={handleGoToSignup}>
+            <a style={{ color: "blue" }} onClick={() => navigate("/signup")}>
               Đăng ký ngay!
             </a>
           </p>

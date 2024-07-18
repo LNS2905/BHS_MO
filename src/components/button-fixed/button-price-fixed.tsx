@@ -9,7 +9,7 @@ const ButtonPriceFixed = ({ handleOnClick }: { handleOnClick: () => void }) => {
   const { quantity, totalPrice } = useMemo(() => {
     return cart.items.reduce(
       (acc, item) => {
-        acc.quantity += item.quantity;
+        acc.quantity += 1;
         acc.totalPrice += (item.product.price || 0) * item.quantity;
         return acc;
       },

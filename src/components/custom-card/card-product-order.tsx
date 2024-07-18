@@ -45,7 +45,7 @@ const CardProductOrder = ({
     </div>
     <span className=" pt-1 font-semibold text-sm">
       <span className=" font-normal text-xs">đ</span>
-      {convertPrice(salePrice)}
+      {convertPrice(salePrice * quantity)}
     </span>
   </div>
 );

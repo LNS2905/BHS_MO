@@ -1,11 +1,12 @@
 import React, { Suspense, useEffect } from "react";
-import { Navigate, Route } from "react-router-dom";
+import { Route } from "react-router-dom";
 import {
   AnimationRoutes,
   App,
   SnackbarProvider,
   Spinner,
   ZMPRouter,
+  useNavigate,
 } from "zmp-ui";
 import DetailProduct from "../pages/detail-product";
 import FinishOrder from "../pages/finish-order";
@@ -17,33 +18,36 @@ import useStore from "../store";
 import { hexToRgb } from "../utils";
 import { ConfigProvider, getConfig } from "./config-provider";
 import Header from "./header";
-import ProductPicker from "./product-picker";
+import ProductPickerSheet from "./product-picker-sheet";
 
 const PrivateRoute = ({ children }) => {
-  const { loginResponse } = useStore((state) => state);
-  return loginResponse?.isSuccess ? children : <Navigate to="/" />;
+  const { isLoggedIn } = useStore((state) => state);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn, navigate]);
+
+  return isLoggedIn ? children : null;
 };
 
 const MyApp = () => {
-  const { loginResponse, storeId, setLoginResponse, setStoreId, fetchCart } =
-    useStore((state) => state);
+  const { setAccessToken, setStoreId, setIsLoggedIn, fetchCart } = useStore(
+    (state) => state
+  );
 
   useEffect(() => {
     const accessToken = sessionStorage.getItem("accessToken");
     const storeIdFromSession = sessionStorage.getItem("storeId");
     if (accessToken && storeIdFromSession) {
-      setLoginResponse({
-        isSuccess: true,
-        accessToken,
-        refreshToken: "",
-        storeId: Number(storeIdFromSession),
-        tokenType: "BEARER",
-        message: "",
-      });
+      setAccessToken(accessToken);
       setStoreId(storeIdFromSession);
+      setIsLoggedIn(true);
       fetchCart(Number(storeIdFromSession));
     }
-  }, [setLoginResponse, setStoreId, fetchCart]);
+  }, [setAccessToken, setStoreId, setIsLoggedIn, fetchCart]);
 
   return (
     <ConfigProvider
@@ -69,9 +73,9 @@ const MyApp = () => {
                 <Route
                   path="/menu"
                   element={
-                    // <PrivateRoute>
-                    <MenuPage />
-                    // </PrivateRoute>
+                    <PrivateRoute>
+                      <MenuPage />
+                    </PrivateRoute>
                   }
                 />
                 <Route
@@ -99,7 +103,7 @@ const MyApp = () => {
                   }
                 />
               </AnimationRoutes>
-              <ProductPicker />
+              <ProductPickerSheet />
             </ZMPRouter>
           </SnackbarProvider>
         </Suspense>
