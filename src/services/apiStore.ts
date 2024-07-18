@@ -7,10 +7,10 @@ const apiStore: AxiosInstance = axios.create({
 
 apiStore.interceptors.request.use((config: AxiosRequestConfig) => {
   const { accessToken } = useStore.getState();
-  if (accessToken) {
+  if (accessToken && !config.url?.includes('/auth/')) {
     config.headers.Authorization = `Bearer ${accessToken}`;
-    config.headers["Content-Type"] = "application/json";
   }
+  config.headers["Content-Type"] = "application/json";
   return config;
 });
 

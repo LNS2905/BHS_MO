@@ -9,10 +9,13 @@ import {
   useNavigate,
 } from "zmp-ui";
 import DetailOrder from "../pages/detail-order";
+import OrderDetailShipper from "../pages/detail-order-shipper";
 import DetailProduct from "../pages/detail-product";
 import FinishOrder from "../pages/finish-order";
 import MenuPage from "../pages/menu";
 import OrderSuccess from "../pages/order-success";
+import OrdersOfShipper from "../pages/ordersOfShipper";
+import ShipperProfile from "../pages/shipper-profile";
 import Signin from "../pages/signin";
 import Signup from "../pages/signup";
 import StoreProfile from "../pages/store-profile";
@@ -38,6 +41,7 @@ const PrivateRoute = ({ children }) => {
 
 const MyApp = () => {
   const {
+    clearTokens,
     accessToken,
     storeId,
     isLoggedIn,
@@ -54,6 +58,9 @@ const MyApp = () => {
     }
   }, [accessToken, storeId, setIsLoggedIn, fetchCart]);
 
+  useEffect(() => {
+    clearTokens();
+  }, [clearTokens]);
   return (
     <ConfigProvider
       cssVariables={{
@@ -131,6 +138,24 @@ const MyApp = () => {
                     </PrivateRoute>
                   }
                 />
+                <Route
+                  path="/ordersofshipper"
+                  element={
+                    <PrivateRoute>
+                      <OrdersOfShipper />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/orderdetailshipper/:orderId"
+                  element={
+                    <PrivateRoute>
+                      <OrderDetailShipper />
+                    </PrivateRoute>
+                  }
+                />
+                <Route path="/shipperprofile" element={<ShipperProfile />} />
+
                 <Route path="*" element={<div>404 Not Found</div>} />
               </AnimationRoutes>
               <ProductPickerSheet />

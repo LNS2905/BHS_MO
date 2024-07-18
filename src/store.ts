@@ -98,6 +98,7 @@ interface State {
   refreshToken: string | null;
   storeId: string | null;
   cartId: string | null;
+  clearTokens: () => void;
   isLoggedIn: boolean;
   setAccessToken: (accessToken: string | null) => void;
   setRefreshToken: (refreshToken: string | null) => void;
@@ -149,6 +150,7 @@ const useStore = create<State>()(
       setUsername: (username) => set({ username }),
       setLocationSignup: (locationSignup) => set({ locationSignup }),
       location: '',
+      clearTokens: () => set({ accessToken: null, refreshToken: null }),
       setLocation: (location) => set({ location }),
       loginResponse: null,
       setLoginResponse: (loginResponse) => set({ loginResponse }),

@@ -10,9 +10,8 @@ import apiStore from "../services/apiStore";
 import useStore from "../store";
 
 const Signin: React.FunctionComponent = () => {
-  const { setAccessToken, setStoreId, setIsLoggedIn, setCartId } = useStore(
-    (state) => state
-  );
+  const { setAccessToken, setStoreId, setIsLoggedIn, setCartId, clearTokens } =
+    useStore((state) => state);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginType, setLoginType] = useState<"store" | "shipper">("store");
@@ -118,7 +117,7 @@ const Signin: React.FunctionComponent = () => {
         setIsLoggedIn(true);
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
-        navigate("/shipper-dashboard");
+        navigate("/shipperprofile");
       } else {
         console.log(loginResponse.data.message);
       }
@@ -135,6 +134,10 @@ const Signin: React.FunctionComponent = () => {
     });
     changeStatusBarColor("secondary");
   }, [setHeader]);
+
+  useEffect(() => {
+    clearTokens();
+  }, [clearTokens]);
 
   return (
     <Page>
@@ -154,7 +157,7 @@ const Signin: React.FunctionComponent = () => {
                 ? "bg-primary text-white"
                 : "bg-slate-400 text-black"
             }
-            onClick={() => setLoginType("store")}>
+            onClick={handleStoreLogin}>
             Đăng nhập với vai trò Store
           </Button>
         </div>
@@ -198,14 +201,6 @@ const Signin: React.FunctionComponent = () => {
               Đăng nhập
             </Button>
           </form>
-        )}
-        {loginType === "store" && (
-          <Button
-            type="highlight"
-            onClick={handleStoreLogin}
-            className="w-full">
-            Đăng nhập Store với Zalo
-          </Button>
         )}
         <p className="mt-4 text-center">
           Chưa có tài khoản?{" "}
