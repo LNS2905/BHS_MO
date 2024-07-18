@@ -1,48 +1,35 @@
 import React, { useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Updated import for useNavigate
+import { useNavigate, useParams } from "react-router-dom";
 import { openShareSheet } from "zmp-sdk";
-import { Box, Icon, Page } from "zmp-ui";
+import { Box, Icon, Page, Text } from "zmp-ui";
 import ButtonFixed, {
   ButtonType,
 } from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
 import useSetHeader from "../components/hooks/useSetHeader";
-import { Product } from "../models";
 import { changeStatusBarColor } from "../services";
 import useStore from "../store";
 import { calcSalePercentage, convertPrice } from "../utils";
 
 const DetailProduct = () => {
-  const {
-    store,
-    cart,
-    cartTotalPrice,
-    setOpenProductPicker,
-    setProductInfoPicked,
-  } = useStore((state) => state);
+  const { menu, cart, setOpenProductPicker, setProductInfoPicked } = useStore(
+    (state) => state
+  );
   const navigate = useNavigate();
-  const { productId } = useParams(); // Use useParams to get productId from URL
+  const { productId } = useParams();
 
   const setHeader = useSetHeader();
 
-  const product: Product | undefined = useMemo(() => {
-    if (store && store.products) {
-      // Updated to match the structure in store.ts
-      const currentProduct = store.products.find(
-        (item) => item.id === Number(productId)
-      );
-      return currentProduct;
+  const product = useMemo(() => {
+    return menu.find((item) => item.id === Number(productId));
+  }, [productId, menu]);
+
+  const salePercentage = useMemo(() => {
+    if (product && product.price && product.product.basePrice) {
+      return calcSalePercentage(product.price, product.product.basePrice);
     }
     return undefined;
-  }, [productId, store]);
-
-  const salePercentage = useMemo(
-    () =>
-      product && product.salePrice && product.retailPrice
-        ? calcSalePercentage(product.salePrice, product.retailPrice)
-        : undefined,
-    [product]
-  );
+  }, [product]);
 
   const btnCart: ButtonType = useMemo(
     () => ({
@@ -51,10 +38,10 @@ const DetailProduct = () => {
       type: "primary",
       onClick: () => {
         setOpenProductPicker(true);
-        setProductInfoPicked({ productId: Number(productId), isUpdate: true });
+        setProductInfoPicked({ productId: Number(productId), isUpdate: false });
       },
     }),
-    [productId]
+    [productId, setOpenProductPicker, setProductInfoPicked]
   );
 
   const btnPayment: ButtonType = useMemo(
@@ -66,12 +53,12 @@ const DetailProduct = () => {
         navigate("/finish-order");
       },
     }),
-    [cart]
+    [navigate]
   );
 
   const listBtn = useMemo<ButtonType[]>(
-    () => (cartTotalPrice > 0 ? [btnPayment, btnCart] : [btnCart]),
-    [cartTotalPrice, btnCart, btnPayment]
+    () => (cart.items.length > 0 ? [btnPayment, btnCart] : [btnCart]),
+    [cart.items.length, btnCart, btnPayment]
   );
 
   useEffect(() => {
@@ -84,9 +71,9 @@ const DetailProduct = () => {
               type: "zmp",
               data: {
                 path: "/",
-                title: product?.name,
-                description: product?.description.slice(0, 100),
-                thumbnail: product?.img,
+                title: product?.product.name,
+                description: product?.product.description?.slice(0, 100),
+                thumbnail: product?.product.urlImage,
               },
             })
           }>
@@ -97,44 +84,47 @@ const DetailProduct = () => {
     changeStatusBarColor();
   }, [product, setHeader]);
 
+  if (!product) {
+    return <Page>Product not found</Page>;
+  }
+
   return (
     <Page>
       <div
-        className=" relative bg-white w-full"
-        style={{ paddingBottom: cartTotalPrice > 0 ? "120px" : "80px" }}>
-        {product && (
-          <>
-            <img src={product.img} alt="" className="w-full h-auto" />
-            {salePercentage && (
-              <div className="absolute top-2.5 right-2.5 text-white font-medium text-sm px-2 py-1 bg-[#FF9743] w-auto h-auto rounded-lg">
-                -{salePercentage}%
-              </div>
-            )}
-            <Box m={0} p={4} className="border-b">
-              <div className=" text-lg">{product.name}</div>
-              <span className=" pt-1 font-semibold text-base text-primary">
-                <span className=" font-normal text-xs text-primary">đ</span>
-                {convertPrice(product.salePrice)}
-              </span>
-              <span className=" pl-2 pt-1 font-medium text-sm text-zinc-400">
-                đ{convertPrice(product.retailPrice)}
-              </span>
-            </Box>
-            <Box
-              m={0}
-              px={4}
-              py={5}
-              className=" text-justify break-words whitespace-pre-line">
-              {product.description}
-            </Box>
-          </>
+        className="relative bg-white w-full"
+        style={{ paddingBottom: cart.items.length > 0 ? "120px" : "80px" }}>
+        <img src={product.product.urlImage} alt="" className="w-full h-auto" />
+        {salePercentage && (
+          <div className="absolute top-2.5 right-2.5 text-white font-medium text-sm px-2 py-1 bg-[#FF9743] w-auto h-auto rounded-lg">
+            -{salePercentage}%
+          </div>
         )}
+        <Box m={0} p={4} className="border-b">
+          <Text.Title className="text-lg">{product.product.name}</Text.Title>
+          <Text.Title className="pt-1 font-semibold text-base text-primary">
+            <span className="font-normal text-xs text-primary">đ</span>
+            {convertPrice(product.price)}
+          </Text.Title>
+          <Text className="pl-2 pt-1 font-medium text-sm text-zinc-400 line-through">
+            đ{convertPrice(product.product.basePrice)}
+          </Text>
+        </Box>
+        <Box
+          m={0}
+          px={4}
+          py={5}
+          className="text-justify break-words whitespace-pre-line">
+          {product.product.description}
+        </Box>
       </div>
 
-      {!!cartTotalPrice && (
+      {cart.items.length > 0 && (
         <ButtonPriceFixed
-          quantity={cart.items.length} // Updated to match the structure in store.ts
-          totalPrice={cartTotalPrice}
+          quantity={cart.items.length}
+          totalPrice={cart.items.reduce(
+            (total, item) => total + item.product.price * item.quantity,
+            0
+          )}
           handleOnClick={() => navigate("/finish-order")}
         />
       )}

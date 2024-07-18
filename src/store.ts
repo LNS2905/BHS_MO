@@ -64,12 +64,7 @@ interface State {
     location: string;
     storeLevel: number;
   } | null;
-  storeUpdateRequest: {
-    id: number;
-    name: string;
-    phoneNumber: string;
-    location: string;
-  } | null;
+  setStoreDetails: (details: State['storeDetails']) => void;
   menu: ProductMenu[];
   setMenu: (menu: ProductMenu[]) => void;
   paginationResponse: {
@@ -110,7 +105,6 @@ interface State {
   setCartId: (cartId: string | null) => void;
   setIsLoggedIn: (status: boolean) => void;
   logout: () => void;
-  // Thêm action mới vào State interface
   fetchNewCart: (storeId: string) => Promise<void>;
 }
 
@@ -142,7 +136,7 @@ const useStore = create<State>()(
       locationSignup: '',
       order: null,
       storeDetails: null,
-      storeUpdateRequest: null,
+      setStoreDetails: (details) => set({ storeDetails: details }),
       menu: [],
       setMenu: (menu) => set({ menu }),
       paginationResponse: null,
@@ -240,6 +234,7 @@ const useStore = create<State>()(
         });
       },
       deserialize: (str) => JSON.parse(str),
+      getStorage: () => localStorage,
     }
   )
 );

@@ -1,6 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Icon } from "zmp-ui";
+import { Icon, useNavigate } from "zmp-ui";
 import useStore from "../store";
 import { cx } from "../utils";
 

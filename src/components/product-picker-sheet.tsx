@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, Sheet } from "zmp-ui";
+import { Box, Button, Sheet, useNavigate } from "zmp-ui";
 import api from "../../src/services/api";
 import useStore from "../store";
 import { convertPrice } from "../utils";

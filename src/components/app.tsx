@@ -14,6 +14,8 @@ import MenuPage from "../pages/menu";
 import OrderSuccess from "../pages/order-success";
 import Signin from "../pages/signin";
 import Signup from "../pages/signup";
+import StoreProfile from "../pages/store-profile";
+import ViewOrders from "../pages/view-orders";
 import useStore from "../store";
 import { hexToRgb } from "../utils";
 import { ConfigProvider, getConfig } from "./config-provider";
@@ -34,20 +36,22 @@ const PrivateRoute = ({ children }) => {
 };
 
 const MyApp = () => {
-  const { setAccessToken, setStoreId, setIsLoggedIn, fetchCart } = useStore(
-    (state) => state
-  );
+  const {
+    accessToken,
+    storeId,
+    isLoggedIn,
+    setAccessToken,
+    setStoreId,
+    setIsLoggedIn,
+    fetchCart,
+  } = useStore((state) => state);
 
   useEffect(() => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const storeIdFromSession = sessionStorage.getItem("storeId");
-    if (accessToken && storeIdFromSession) {
-      setAccessToken(accessToken);
-      setStoreId(storeIdFromSession);
+    if (accessToken && storeId) {
       setIsLoggedIn(true);
-      fetchCart(Number(storeIdFromSession));
+      fetchCart(Number(storeId));
     }
-  }, [setAccessToken, setStoreId, setIsLoggedIn, fetchCart]);
+  }, [accessToken, storeId, setIsLoggedIn, fetchCart]);
 
   return (
     <ConfigProvider
@@ -99,6 +103,22 @@ const MyApp = () => {
                   element={
                     <PrivateRoute>
                       <DetailProduct />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/store-profile"
+                  element={
+                    <PrivateRoute>
+                      <StoreProfile />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/view-orders"
+                  element={
+                    <PrivateRoute>
+                      <ViewOrders />
                     </PrivateRoute>
                   }
                 />

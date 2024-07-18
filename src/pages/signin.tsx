@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import React, { useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Updated import for useNavigate
-import { Button, Input, Page, Text } from "zmp-ui";
+import { Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { LoginResponse } from "../models";
 import { changeStatusBarColor } from "../services";

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Updated import for useNavigate
-import { Button, Input, Page, Text } from "zmp-ui";
+import { Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
 import api from "../services/api";

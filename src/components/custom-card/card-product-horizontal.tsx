@@ -1,6 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Icon } from "zmp-ui";
+import { Box, Icon, useNavigate } from "zmp-ui";
 import ProductPickerSheet from "../../components/product-picker-sheet";
 import useStore from "../../store";
 import { convertPrice } from "../../utils";

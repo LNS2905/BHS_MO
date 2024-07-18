@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Input, Page, useNavigate } from "zmp-ui"; // Updated import for useNavigate
+import { Icon, Input, Page, useNavigate } from "zmp-ui"; // Updated import for useNavigate
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
 import { getConfig } from "../components/config-provider";
@@ -12,9 +12,8 @@ import api from "../services/api";
 import useStore from "../store";
 
 const MenuPage: React.FunctionComponent = () => {
-  const { setMenu, menu, setSearchProduct, cart, fetchCart } = useStore(
-    (state) => state
-  );
+  const { setMenu, menu, setSearchProduct, cart, fetchCart, storeId } =
+    useStore((state) => state);
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
@@ -27,13 +26,21 @@ const MenuPage: React.FunctionComponent = () => {
 
   const searchBar = useMemo(
     () => (
-      <Input.Search
-        placeholder="Tìm kiếm sản phẩm"
-        onSearch={handleInputSearch}
-        className="cus-input-search"
-      />
+      <div className="flex items-center">
+        <Input.Search
+          placeholder="Tìm kiếm sản phẩm"
+          onSearch={handleInputSearch}
+          className="cus-input-search flex-grow"
+        />
+        <Icon
+          icon="zi-user"
+          size={24}
+          className="ml-2"
+          onClick={() => navigate("/store-profile")}
+        />
+      </div>
     ),
-    [handleInputSearch]
+    [handleInputSearch, navigate]
   );
 
   useEffect(() => {
@@ -51,9 +58,7 @@ const MenuPage: React.FunctionComponent = () => {
           size: 10,
         };
         const response = await api.get<PaginationResponse<ProductMenu>>(
-          `/menu?page=${pageable.page}&size=${
-            pageable.size
-          }&storeId=${sessionStorage?.getItem("storeId")}`
+          `/menu?page=${pageable.page}&size=${pageable.size}&storeId=${storeId}`
         );
         if (response.data.isSuccess) {
           console.log("Data Products: ", response.data.data.content);

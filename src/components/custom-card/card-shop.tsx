@@ -1,6 +1,7 @@
 import React from "react";
 import { openChat } from "zmp-sdk";
 import { Button, Icon } from "zmp-ui";
+import { DEFAULT_OA_ID } from "../../constants";
 import { getConfig } from "../config-provider";
 
 const CardShop = () => {
@@ -9,7 +10,7 @@ const CardShop = () => {
 
     openChat({
       type: "oa",
-      id: "3845899341339907617",
+      id: oaId || DEFAULT_OA_ID,
     });
   };
 

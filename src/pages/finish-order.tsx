@@ -137,7 +137,15 @@ const FinishOrder: React.FC = () => {
               Thời gian giao hàng
             </Text>
             <div className="py-3">
-              <Calendar fullscreen={false} onPanelChange={onPanelChange} />
+              <div style={{ border: "1px solid #d9d9d9", borderRadius: "2px" }}>
+                <Calendar
+                  fullscreen={false}
+                  onPanelChange={(value, mode) => {
+                    console.log(value.format("YYYY-MM-DD"), mode);
+                    onPanelChange(value);
+                  }}
+                />
+              </div>
             </div>
           </Box>
           {shippingFee > 0 && (
@@ -150,8 +158,8 @@ const FinishOrder: React.FC = () => {
           )}
 
           <Text className="p-4 text-center">
-            {`Đặt hàng đồng nghĩa với việc bạn đồng ý quan tâm 
-              ${store?.name} 
+            {`Đặt hàng đồng nghĩa với việc bạn đồng ý quan tâm
+              Bách Hóa Sỉ
               để nhận tin tức mới`}
           </Text>
         </div>
