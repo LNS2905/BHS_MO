@@ -8,6 +8,7 @@ import {
   ZMPRouter,
   useNavigate,
 } from "zmp-ui";
+import DetailOrder from "../pages/detail-order";
 import DetailProduct from "../pages/detail-product";
 import FinishOrder from "../pages/finish-order";
 import MenuPage from "../pages/menu";
@@ -122,6 +123,15 @@ const MyApp = () => {
                     </PrivateRoute>
                   }
                 />
+                <Route
+                  path="/detail-order/:orderId"
+                  element={
+                    <PrivateRoute>
+                      <DetailOrder />
+                    </PrivateRoute>
+                  }
+                />
+                <Route path="*" element={<div>404 Not Found</div>} />
               </AnimationRoutes>
               <ProductPickerSheet />
             </ZMPRouter>
