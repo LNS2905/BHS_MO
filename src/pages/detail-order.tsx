@@ -1,8 +1,6 @@
-// detail-order.tsx
-import { Image } from "antd";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Page, Text } from "zmp-ui";
+import { Box, Page, Text, useSnackbar } from "zmp-ui";
 import apistore from "../services/apistore";
 import useStore from "../store";
 
@@ -40,6 +38,7 @@ const DetailOrder: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [totalOrderPrice, setTotalOrderPrice] = useState<number>(0);
   const { storeId } = useStore((state) => state);
+  const { openSnackbar } = useSnackbar();
 
   useEffect(() => {
     fetchOrderDetails();
@@ -57,9 +56,23 @@ const DetailOrder: React.FC = () => {
       if (response.data.isSuccess) {
         setOrderDetails(response.data.data);
         calculateTotalOrderPrice(response.data.data.content);
+        openSnackbar({
+          text: "Order details fetched successfully",
+          type: "success",
+        });
+      } else {
+        console.error("Error fetching order details:", response.data.message);
+        openSnackbar({
+          text: `Error: ${response.data.message}`,
+          type: "error",
+        });
       }
     } catch (error) {
       console.error("Error fetching order details:", error);
+      openSnackbar({
+        text: "Failed to fetch order details",
+        type: "error",
+      });
     }
   };
 
@@ -79,7 +92,7 @@ const DetailOrder: React.FC = () => {
         </Text>
         {orderDetails?.content.map((item) => (
           <Box key={item.id} className="mb-4 p-3 border rounded flex">
-            <Image
+            <img
               src={item.product.product.urlImage}
               alt={item.product.product.name}
               width={120}

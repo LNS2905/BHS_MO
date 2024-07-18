@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Page, Text } from "zmp-ui";
+import { Box, Page, Text, useSnackbar } from "zmp-ui";
 import apiShipper from "../services/apiShipper";
 import useStore from "../store";
 
@@ -32,6 +32,7 @@ const OrderDetailShipper: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
   const { accessToken } = useStore((state) => state);
+  const { openSnackbar } = useSnackbar();
 
   useEffect(() => {
     fetchOrderDetail();
@@ -53,11 +54,23 @@ const OrderDetailShipper: React.FC = () => {
 
       if (response.data.isSuccess) {
         setOrderDetail(response.data.data);
+        openSnackbar({
+          text: "Order details fetched successfully",
+          type: "success",
+        });
       } else {
         console.error("Error fetching order details:", response.data.message);
+        openSnackbar({
+          text: `Error: ${response.data.message}`,
+          type: "error",
+        });
       }
     } catch (error) {
       console.error("Error fetching order details:", error);
+      openSnackbar({
+        text: "Failed to fetch order details",
+        type: "error",
+      });
     }
   };
 
