@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import { Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
-import api from "../services/api";
+import apistore from "../services/apistore";
 import useStore from "../store";
 
 interface SignupResponse {
@@ -31,12 +31,15 @@ const Signup: React.FunctionComponent = () => {
     async (event) => {
       event.preventDefault();
 
-      const response = await api.post<SignupResponse>("/auth/zalo/signup", {
-        name,
-        location,
-        phoneNumber,
-        zaloId: "3398637342326461234",
-      });
+      const response = await apistore.post<SignupResponse>(
+        "/auth/zalo/signup",
+        {
+          name,
+          location,
+          phoneNumber,
+          zaloId: "3398637342326461234",
+        }
+      );
 
       if (response.data.isSuccess) {
         sessionStorage.setItem(

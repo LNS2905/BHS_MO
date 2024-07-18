@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { CartProduct } from '../models';
-import api from '../services/api';
+import apistore from '../services/apistore';
 import useStore from '../store';
 
 const useUpdateProductInCart = () => {
@@ -10,7 +10,7 @@ const useUpdateProductInCart = () => {
     async (productOrder: CartProduct) => {
       try {
         const cartId = sessionStorage.getItem("cartId");
-        const response = await api.put('/carts/item', {
+        const response = await apistore.put('/carts/item', {
           cartProductMenuId: productOrder.id,
           storeId: cart.storeId,
           cartId: Number(cartId),

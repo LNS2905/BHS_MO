@@ -8,7 +8,7 @@ import CardShop from "../components/custom-card/card-shop";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { Pageable, PaginationResponse, ProductMenu } from "../models";
 import { changeStatusBarColor } from "../services";
-import api from "../services/api";
+import apistore from "../services/apistore";
 import useStore from "../store";
 
 const MenuPage: React.FunctionComponent = () => {
@@ -57,7 +57,7 @@ const MenuPage: React.FunctionComponent = () => {
           page: 0,
           size: 10,
         };
-        const response = await api.get<PaginationResponse<ProductMenu>>(
+        const response = await apistore.get<PaginationResponse<ProductMenu>>(
           `/menu?page=${pageable.page}&size=${pageable.size}&storeId=${storeId}`
         );
         if (response.data.isSuccess) {

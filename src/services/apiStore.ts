@@ -1,11 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import useStore from "../store";
 
-const api: AxiosInstance = axios.create({
+const apiStore: AxiosInstance = axios.create({
   baseURL: "https://api-user.fams.college/api/v1",
 });
 
-api.interceptors.request.use((config: AxiosRequestConfig) => {
+apiStore.interceptors.request.use((config: AxiosRequestConfig) => {
   const { accessToken } = useStore.getState();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -14,4 +14,4 @@ api.interceptors.request.use((config: AxiosRequestConfig) => {
   return config;
 });
 
-export default api;
+export default apiStore;

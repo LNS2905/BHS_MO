@@ -1,37 +1,69 @@
 import bcrypt from "bcryptjs";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { getAccessToken, getPhoneNumber, getUserInfo } from "zmp-sdk/apis";
 import { Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { LoginResponse } from "../models";
 import { changeStatusBarColor } from "../services";
-import api from "../services/api";
+import apiShipper from "../services/apiShipper";
+import apistore from "../services/apistore";
 import useStore from "../store";
 
 const Signin: React.FunctionComponent = () => {
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    setAccessToken,
-    setStoreId,
-    setIsLoggedIn,
-    setCartId,
-  } = useStore((state) => state);
+  const { setAccessToken, setStoreId, setIsLoggedIn, setCartId } = useStore(
+    (state) => state
+  );
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginType, setLoginType] = useState<"store" | "shipper">("store");
   const navigate = useNavigate();
   const setHeader = useSetHeader();
 
-  const handleCustomerLogin = useCallback(async () => {
+  const handleStoreLogin = useCallback(async () => {
     try {
-      const phoneNumber = "84333336938";
+      // Get user info from Zalo
+      const { userInfo } = await getUserInfo({});
+
+      // Get phone number from Zalo
+      const { token } = await new Promise((resolve, reject) => {
+        getPhoneNumber({
+          success: (data) => resolve(data),
+          fail: (error) => reject(error),
+        });
+      });
+
+      const accessTokenZalo = await new Promise((resolve, reject) => {
+        getAccessToken({
+          success: (data) => {
+            console.log("access_token_zalo:", data);
+            resolve(data as string);
+          },
+          fail: (error) => reject(error),
+        });
+      });
+
+      // Extract phone number from token
+      const phoneNumber = await fetch(`https://graph.zalo.me/v2.0/me/info`, {
+        headers: {
+          access_token: accessTokenZalo,
+          code: token,
+          secret_key: "0TR1rUOW664SjBe84Y4m",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => data.data.number);
+
+      // Hash phone number
       const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
 
-      const zaloId = "3368637342326461234";
-
-      const loginResponse = await api.post<LoginResponse>("/auth/zalo/login", {
-        zaloId: zaloId,
-        hashPhone: hashedPhoneNumber,
-      });
+      // Call store login API
+      const loginResponse = await apistore.post<LoginResponse>(
+        "/auth/zalo/login",
+        {
+          zaloId: userInfo.id,
+          hashPhone: hashedPhoneNumber,
+        }
+      );
 
       if (loginResponse.data.isSuccess) {
         setAccessToken(loginResponse.data.data.accessToken);
@@ -39,11 +71,11 @@ const Signin: React.FunctionComponent = () => {
         setIsLoggedIn(true);
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
-        console.log(hashedPhoneNumber);
 
-        const getCartByStoreId = async (storeId) => {
+        // Get cart
+        const getCartByStoreId = async (storeId: string) => {
           try {
-            const response = await api.get(`/carts?storeId=${storeId}`, {
+            const response = await apistore.get(`/carts?storeId=${storeId}`, {
               headers: {
                 Authorization: `Bearer ${loginResponse.data.data.accessToken}`,
               },
@@ -60,7 +92,7 @@ const Signin: React.FunctionComponent = () => {
           }
         };
 
-        getCartByStoreId(loginResponse.data.data.storeId);
+        await getCartByStoreId(loginResponse.data.data.storeId.toString());
 
         navigate("/menu");
       } else {
@@ -70,6 +102,30 @@ const Signin: React.FunctionComponent = () => {
       console.log("error:", error);
     }
   }, [setAccessToken, setStoreId, setIsLoggedIn, setCartId, navigate]);
+
+  const handleShipperLogin = useCallback(async () => {
+    try {
+      const loginResponse = await apiShipper.post<LoginResponse>(
+        "/auth/authentication",
+        {
+          email,
+          password,
+        }
+      );
+
+      if (loginResponse.data.isSuccess) {
+        setAccessToken(loginResponse.data.data.accessToken);
+        setIsLoggedIn(true);
+        console.log(loginResponse.data.message);
+        console.log(loginResponse.data.data);
+        navigate("/shipper-dashboard");
+      } else {
+        console.log(loginResponse.data.message);
+      }
+    } catch (error) {
+      console.log("error:", error);
+    }
+  }, [email, password, setAccessToken, setIsLoggedIn, navigate]);
 
   useEffect(() => {
     setHeader({
@@ -90,43 +146,73 @@ const Signin: React.FunctionComponent = () => {
         </div>
       </div>
       <div className="bg-white p-4">
-        <form onSubmit={handleCustomerLogin}>
-          <div className="mb-4">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="cus-input-search"
-            />
-          </div>
-          <div className="mb-4">
-            <Input
-              type="password"
-              placeholder="Mật khẩu"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="cus-input-search"
-            />
-          </div>
-          <Button type="highlight" htmlType="submit" className="w-full">
-            Đăng nhập
+        <div className="mb-4">
+          <Button
+            fullWidth
+            className={
+              loginType === "store"
+                ? "bg-primary text-white"
+                : "bg-slate-400 text-black"
+            }
+            onClick={() => setLoginType("store")}>
+            Đăng nhập với vai trò Store
           </Button>
-          <div className="mt-4 text-center">
-            <Button
-              type="highlight"
-              onClick={handleCustomerLogin}
-              className="text-primary">
-              Đăng nhập với vai trò store
+        </div>
+        <div className="mb-4">
+          <Button
+            fullWidth
+            className={
+              loginType === "shipper"
+                ? "bg-primary text-white"
+                : "bg-slate-400 text-black"
+            }
+            onClick={() => setLoginType("shipper")}>
+            Đăng nhập với vai trò Shipper
+          </Button>
+        </div>
+        {loginType === "shipper" && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleShipperLogin();
+            }}>
+            <div className="mb-4">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="cus-input-search"
+              />
+            </div>
+            <div className="mb-4">
+              <Input
+                type="password"
+                placeholder="Mật khẩu"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="cus-input-search"
+              />
+            </div>
+            <Button type="highlight" htmlType="submit" className="w-full">
+              Đăng nhập
             </Button>
-          </div>
-          <p className="mt-4 text-center">
-            Chưa có tài khoản?{" "}
-            <a style={{ color: "blue" }} onClick={() => navigate("/signup")}>
-              Đăng ký ngay!
-            </a>
-          </p>
-        </form>
+          </form>
+        )}
+        {loginType === "store" && (
+          <Button
+            type="highlight"
+            onClick={handleStoreLogin}
+            className="w-full">
+            Đăng nhập Store với Zalo
+          </Button>
+        )}
+        <p className="mt-4 text-center">
+          Chưa có tài khoản?{" "}
+          <a style={{ color: "blue" }} onClick={() => navigate("/signup")}>
+            Đăng ký ngay!
+          </a>
+        </p>
       </div>
     </Page>
   );

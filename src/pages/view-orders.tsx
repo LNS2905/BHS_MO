@@ -3,7 +3,7 @@ import { Form, Input, Modal, Pagination } from "antd";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Button, Page, Text } from "zmp-ui";
-import api from "../services/api";
+import apistore from "../services/apistore";
 import useStore from "../store";
 
 interface Order {
@@ -40,7 +40,7 @@ const ViewOrders: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await api.get("/orders", {
+      const response = await apistore.get("/orders", {
         params: {
           page: currentPage - 1,
           size: pageSize,
@@ -72,7 +72,7 @@ const ViewOrders: React.FC = () => {
 
   const handleFeedbackSubmit = async (values: any) => {
     try {
-      const response = await api.post("/orders/feedback", {
+      const response = await apistore.post("/orders/feedback", {
         storeId: storeId,
         orderId: selectedOrderId,
         orderFeedback: values.orderFeedback,

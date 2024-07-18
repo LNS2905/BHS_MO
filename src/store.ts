@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartProduct, LoginResponse, PaginationResponse, Product, ProductMenu, ResponseObject, Store } from './models';
-import api from './services/api';
+import apistore from './services/apistore';
 
 interface State {
   store: Store | null;
@@ -160,7 +160,7 @@ const useStore = create<State>()(
           return;
         }
         try {
-          const response = await api.get<ResponseObject<PaginationResponse<CartProduct>>>(`/carts/items`, {
+          const response = await apistore.get<ResponseObject<PaginationResponse<CartProduct>>>(`/carts/items`, {
             params: {
               page: 0,
               size: 100,
@@ -200,7 +200,7 @@ const useStore = create<State>()(
       }),
       fetchNewCart: async (storeId) => {
         try {
-          const response = await api.get<ResponseObject<{ cartId: number }>>('/carts', {
+          const response = await apistore.get<ResponseObject<{ cartId: number }>>('/carts', {
             params: { storeId },
           });
           if (response.data.isSuccess) {

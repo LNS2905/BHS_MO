@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { CartProductMenuResponse, CartRequest } from '../models';
-import api from '../services/api';
+import apistore from '../services/apistore';
 import useStore from '../store';
 
 const useAddProductToCart = () => {
@@ -9,7 +9,7 @@ const useAddProductToCart = () => {
   return useCallback(
     async (cartRequest: CartRequest) => {
       try {
-        const response = await api.post<CartProductMenuResponse>('/carts', cartRequest);
+        const response = await apistore.post<CartProductMenuResponse>('/carts', cartRequest);
         if (response.data.isSuccess) {
           setCart((oldCart) => {
             const cart = { ...oldCart };

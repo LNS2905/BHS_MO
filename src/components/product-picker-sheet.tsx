@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Button, Sheet, useNavigate } from "zmp-ui";
-import api from "../../src/services/api";
+import apistore from "../../src/services/apistore";
 import useStore from "../store";
 import { convertPrice } from "../utils";
 import ImageRatio from "./img-ratio";
@@ -52,7 +52,7 @@ const ProductPickerSheet: React.FC = () => {
     if (!selectedProduct || !cartId || !storeId) return;
 
     try {
-      const response = await api.post("/carts", {
+      const response = await apistore.post("/carts", {
         cartProductMenuId: selectedProduct.id,
         storeId: parseInt(storeId),
         cartId: parseInt(cartId),
@@ -76,7 +76,7 @@ const ProductPickerSheet: React.FC = () => {
     if (!selectedProduct || !cartProduct || !cartId || !storeId) return;
 
     try {
-      const response = await api.put("/carts/item", {
+      const response = await apistore.put("/carts/item", {
         cartProductMenuId: cartProduct.id,
         storeId: parseInt(storeId),
         cartId: parseInt(cartId),
@@ -108,7 +108,7 @@ const ProductPickerSheet: React.FC = () => {
     if (!cartProduct || !cartId || !storeId) return;
 
     try {
-      const response = await api.delete("/carts/item", {
+      const response = await apistore.delete("/carts/item", {
         data: {
           itemId: cartProduct.id,
           cartId: parseInt(cartId),

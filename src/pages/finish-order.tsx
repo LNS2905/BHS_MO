@@ -8,7 +8,7 @@ import CardProductOrder from "../components/custom-card/card-product-order";
 import CardStore from "../components/custom-card/card-store";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor, pay } from "../services";
-import api from "../services/api";
+import apistore from "../services/apistore";
 import useStore from "../store";
 import { convertPrice } from "../utils";
 
@@ -74,7 +74,7 @@ const FinishOrder: React.FC = () => {
 
   const postOrder = async (payingMethod: "COD" | "BANKING") => {
     try {
-      const response = await api.post("/orders", {
+      const response = await apistore.post("/orders", {
         storeId,
         cartId,
         payingMethod,

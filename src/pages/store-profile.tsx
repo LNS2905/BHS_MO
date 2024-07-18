@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Button, Input, Page, Select, Text } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
-import api from "../services/api";
+import apistore from "../services/apistore";
 import useStore from "../store";
 
 interface StoreDetails {
@@ -33,7 +33,7 @@ const StoreProfile: React.FC = () => {
 
     const fetchStoreDetails = async () => {
       try {
-        const response = await api.get(`/store/details?id=${storeId}`);
+        const response = await apistore.get(`/store/details?id=${storeId}`);
         if (response.data.isSuccess) {
           setStoreDetails(response.data.data);
           setEditedDetails(response.data.data);
@@ -52,7 +52,7 @@ const StoreProfile: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      const response = await api.put("/store", {
+      const response = await apistore.put("/store", {
         id: storeId,
         name: editedDetails?.name,
         phoneNumber: editedDetails?.phoneNumber,

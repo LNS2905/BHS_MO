@@ -3,7 +3,7 @@ import { Image } from "antd";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Page, Text } from "zmp-ui";
-import api from "../services/api";
+import apistore from "../services/apistore";
 import useStore from "../store";
 
 interface OrderDetail {
@@ -47,7 +47,7 @@ const DetailOrder: React.FC = () => {
 
   const fetchOrderDetails = async () => {
     try {
-      const response = await api.get(`/orders/details`, {
+      const response = await apistore.get(`/orders/details`, {
         params: {
           page: 0,
           size: 10,

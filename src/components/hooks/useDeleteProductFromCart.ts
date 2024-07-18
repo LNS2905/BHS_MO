@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { CartProduct } from '../models';
-import api from '../services/api';
+import apistore from '../services/apistore';
 import useStore from '../store';
 
 const useDeleteProductFromCart = () => {
@@ -10,7 +10,7 @@ const useDeleteProductFromCart = () => {
     async (productOrder: CartProduct) => {
       try {
         const cartId = sessionStorage.getItem("cartId");
-        const response = await api.delete('/carts/item', {
+        const response = await apistore.delete('/carts/item', {
           data: {
             itemId: productOrder.id,
             cartId: Number(cartId),

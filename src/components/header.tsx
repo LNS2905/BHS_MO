@@ -17,10 +17,10 @@ const typeColor = {
 };
 
 const Header = () => {
-  const { header, setHeader } = useStore((state) => state);
+  const { header } = useStore((state) => state);
   const { route, hasLeftIcon, rightIcon, title, customTitle, type } = header;
 
-  const { headerColor, textColor, iconColor } = typeColor[type! || "primary"];
+  const { headerColor, textColor, iconColor } = typeColor[type || "primary"];
   const navigate = useNavigate();
 
   return (
@@ -30,18 +30,26 @@ const Header = () => {
         headerColor,
         textColor
       )}>
-      <div className=" flex items-center h-[44px] pl-5 pr-[105px] gap-3 w-full justify-between">
+      <div className="flex items-center h-[44px] pl-5 pr-[105px] gap-3 w-full justify-between">
         <div className="flex flex-row items-center">
           {hasLeftIcon && (
             <span onClick={() => (route ? navigate(route) : navigate(-1))}>
               <Icon icon="zi-arrow-left" className={iconColor} />
             </span>
           )}
-          {customTitle || (
+          {customTitle ? (
+            React.isValidElement(customTitle) ? (
+              customTitle
+            ) : (
+              <div className="pl-2 text-lg font-medium">
+                {String(customTitle)}
+              </div>
+            )
+          ) : (
             <div className="pl-2 text-lg font-medium">{title}</div>
           )}
         </div>
-        {rightIcon || " "}
+        {rightIcon && React.isValidElement(rightIcon) ? rightIcon : null}
       </div>
     </div>
   );
