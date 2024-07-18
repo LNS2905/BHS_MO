@@ -6,7 +6,7 @@ import useSetHeader from "../components/hooks/useSetHeader";
 import { LoginResponse } from "../models";
 import { changeStatusBarColor } from "../services";
 import apiShipper from "../services/apiShipper";
-import apistore from "../services/apistore";
+import apiStore from "../services/apiStore";
 import useStore from "../store";
 
 const Signin: React.FunctionComponent = () => {
@@ -57,7 +57,7 @@ const Signin: React.FunctionComponent = () => {
       const hashedPhoneNumber = await bcrypt.hash(phoneNumber, 3);
 
       // Call store login API
-      const loginResponse = await apistore.post<LoginResponse>(
+      const loginResponse = await apiStore.post<LoginResponse>(
         "/auth/zalo/login",
         {
           zaloId: userInfo.id,
@@ -75,7 +75,7 @@ const Signin: React.FunctionComponent = () => {
         // Get cart
         const getCartByStoreId = async (storeId: string) => {
           try {
-            const response = await apistore.get(`/carts?storeId=${storeId}`, {
+            const response = await apiStore.get(`/carts?storeId=${storeId}`, {
               headers: {
                 Authorization: `Bearer ${loginResponse.data.data.accessToken}`,
               },

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import { Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
-import apistore from "../services/apistore";
+import apiShipper from "../services/apiShipper";
 import useStore from "../store";
 
 interface SignupResponse {
@@ -31,7 +31,7 @@ const Signup: React.FunctionComponent = () => {
     async (event) => {
       event.preventDefault();
 
-      const response = await apistore.post<SignupResponse>(
+      const response = await apiShipper.post<SignupResponse>(
         "/auth/zalo/signup",
         {
           name,
