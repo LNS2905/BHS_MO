@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Button, Input, Page, Text, useSnackbar } from "zmp-ui";
+import { Box, Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { changeStatusBarColor } from "../services";
 import apiShipper from "../services/apiShipper";
@@ -24,7 +23,6 @@ interface ShipperDetails {
 }
 
 const ShipperProfile: React.FC = () => {
-  const { openSnackbar } = useSnackbar();
   const { accessToken } = useStore((state) => state);
   const [shipperDetails, setShipperDetails] = useState<ShipperDetails | null>(
     null
@@ -104,21 +102,9 @@ const ShipperProfile: React.FC = () => {
       if (response.data.isSuccess) {
         setShipperDetails(response.data.data);
         setIsEditing(false);
-        openSnackbar({
-          text: "Profile updated successfully",
-          type: "success",
-        });
-      } else {
-        openSnackbar({
-          text: response.data.message,
-          type: "error",
-        });
       }
     } catch (error) {
-      openSnackbar({
-        text: "Error updating profile",
-        type: "error",
-      });
+      console.error("Error updating shipper details:", error);
     }
   };
 
@@ -133,23 +119,14 @@ const ShipperProfile: React.FC = () => {
       }>(`/shippers/reset-password?password=${newPassword}`);
 
       if (response.data.isSuccess) {
-        openSnackbar({
-          text: "Password changed successfully",
-          type: "success",
-        });
+        console.log("Password changed successfully:", response.data.message);
         setNewPassword("");
         setShowPasswordInput(false);
       } else {
-        openSnackbar({
-          text: response.data.message,
-          type: "error",
-        });
+        console.error("Error changing password:", response.data.message);
       }
     } catch (error) {
-      openSnackbar({
-        text: "Error changing password",
-        type: "error",
-      });
+      console.error("Error changing password:", error);
     }
   };
 

@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import React, { useCallback, useEffect, useState } from "react";
 import { getAccessToken, getPhoneNumber, getUserInfo } from "zmp-sdk/apis";
-import { Button, Input, Page, Text, useNavigate, useSnackbar } from "zmp-ui";
+import { Button, Input, Page, Text, useNavigate } from "zmp-ui";
 import useSetHeader from "../components/hooks/useSetHeader";
 import { LoginResponse } from "../models";
 import { changeStatusBarColor } from "../services";
@@ -10,7 +10,6 @@ import apiStore from "../services/apiStore";
 import useStore from "../store";
 
 const Signin: React.FunctionComponent = () => {
-  const { openSnackbar } = useSnackbar();
   const { setAccessToken, setStoreId, setIsLoggedIn, setCartId, clearTokens } =
     useStore((state) => state);
   const [email, setEmail] = useState("");
@@ -94,31 +93,14 @@ const Signin: React.FunctionComponent = () => {
 
         await getCartByStoreId(loginResponse.data.data.storeId.toString());
 
-        openSnackbar({
-          text: "Logged in successfully",
-          type: "success",
-        });
         navigate("/menu");
       } else {
-        openSnackbar({
-          text: loginResponse.data.message,
-          type: "error",
-        });
+        console.log(loginResponse.data.message);
       }
     } catch (error) {
-      openSnackbar({
-        text: "Error during login",
-        type: "error",
-      });
+      console.log("error:", error);
     }
-  }, [
-    setAccessToken,
-    setStoreId,
-    setIsLoggedIn,
-    setCartId,
-    navigate,
-    openSnackbar,
-  ]);
+  }, [setAccessToken, setStoreId, setIsLoggedIn, setCartId, navigate]);
 
   const handleShipperLogin = useCallback(async () => {
     try {
@@ -135,24 +117,14 @@ const Signin: React.FunctionComponent = () => {
         setIsLoggedIn(true);
         console.log(loginResponse.data.message);
         console.log(loginResponse.data.data);
-        openSnackbar({
-          text: "Logged in successfully",
-          type: "success",
-        });
         navigate("/shipperprofile");
       } else {
-        openSnackbar({
-          text: loginResponse.data.message,
-          type: "error",
-        });
+        console.log(loginResponse.data.message);
       }
     } catch (error) {
-      openSnackbar({
-        text: "Error during login",
-        type: "error",
-      });
+      console.log("error:", error);
     }
-  }, [email, password, setAccessToken, setIsLoggedIn, navigate, openSnackbar]);
+  }, [email, password, setAccessToken, setIsLoggedIn, navigate]);
 
   useEffect(() => {
     setHeader({
