@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useMemo } from "react";
-import { Icon, Input, Page, useNavigate } from "zmp-ui"; // Updated import for useNavigate
+import { Pagination } from "antd";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Icon, Input, Page, useNavigate } from "zmp-ui";
 import ButtonFixed from "../components/button-fixed/button-fixed";
 import ButtonPriceFixed from "../components/button-fixed/button-price-fixed";
 import { getConfig } from "../components/config-provider";
@@ -16,6 +17,9 @@ const MenuPage: React.FunctionComponent = () => {
     useStore((state) => state);
   const navigate = useNavigate();
   const setHeader = useSetHeader();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const pageSize = 10;
 
   const handleInputSearch = useCallback(
     (text: string) => {
@@ -54,8 +58,8 @@ const MenuPage: React.FunctionComponent = () => {
     const fetchProducts = async () => {
       try {
         const pageable: Pageable = {
-          page: 0,
-          size: 10,
+          page: currentPage - 1,
+          size: pageSize,
         };
         const response = await apistore.get<PaginationResponse<ProductMenu>>(
           `/menu?page=${pageable.page}&size=${pageable.size}&storeId=${storeId}`
@@ -63,6 +67,7 @@ const MenuPage: React.FunctionComponent = () => {
         if (response.data.isSuccess) {
           console.log("Data Products: ", response.data.data.content);
           setMenu(response.data.data.content);
+          setTotalItems(response.data.data.totalElements);
           console.log("Menu:", menu);
         } else {
           console.error(
@@ -77,7 +82,7 @@ const MenuPage: React.FunctionComponent = () => {
 
     fetchProducts();
     fetchCart();
-  }, [setHeader, searchBar, setMenu, fetchCart]);
+  }, [setHeader, searchBar, setMenu, fetchCart, currentPage, storeId]);
 
   const { totalQuantity, totalPrice } = useMemo(() => {
     return cart.items.reduce(
@@ -89,6 +94,10 @@ const MenuPage: React.FunctionComponent = () => {
       { totalQuantity: 0, totalPrice: 0 }
     );
   }, [cart.items]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <Page>
@@ -112,6 +121,13 @@ const MenuPage: React.FunctionComponent = () => {
                 />
               </div>
             ))}
+            <Pagination
+              current={currentPage}
+              total={totalItems}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              className="mt-4 text-center"
+            />
           </div>
           {totalPrice > 0 && (
             <>

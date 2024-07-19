@@ -199,3 +199,24 @@ i.icon {
     transform: translateY(0);
   }
 }
+
+.detail-product-btn {
+  color: white !important;
+}
+
+.detail-product-btn-cart {
+  background-color: #FF4D4F !important; /* Màu đỏ đậm */
+}
+
+.detail-product-btn-payment {
+  background-color: #FFA39E !important; /* Màu đỏ nhạt */
+}
+
+/* Nếu bạn muốn thêm hiệu ứng hover */
+.detail-product-btn-cart:hover {
+  background-color: #FF7875 !important;
+}
+
+.detail-product-btn-payment:hover {
+  background-color: #FFCCC7 !important;
+}

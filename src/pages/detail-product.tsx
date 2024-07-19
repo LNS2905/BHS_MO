@@ -36,6 +36,7 @@ const DetailProduct = () => {
       id: 1,
       content: "Thêm vào giỏ",
       type: "primary",
+      className: "detail-product-btn detail-product-btn-cart",
       onClick: () => {
         setOpenProductPicker(true);
         setProductInfoPicked({ productId: Number(productId), isUpdate: false });
@@ -49,6 +50,7 @@ const DetailProduct = () => {
       id: 2,
       content: "Thanh toán",
       type: "secondary",
+      className: "detail-product-btn detail-product-btn-payment",
       onClick: () => {
         navigate("/finish-order");
       },
@@ -90,6 +92,22 @@ const DetailProduct = () => {
 
   return (
     <Page>
+      <style>
+        {`
+    .detail-product-btn {
+      color: white !important;
+    }
+    .detail-product-btn-cart {
+      background-color: #FF4D4F !important;  /* Màu đỏ đậm */
+    }
+    .detail-product-btn-payment {
+      background-color: #FFA39E !important;  /* Màu đỏ nhạt */
+    }
+    .detail-product-btn:hover, .detail-product-btn:active {
+      opacity: 0.9;
+    }
+  `}
+      </style>
       <div
         className="relative bg-white w-full"
         style={{ paddingBottom: cart.items.length > 0 ? "120px" : "80px" }}>

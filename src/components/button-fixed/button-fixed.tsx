@@ -7,7 +7,7 @@ export type ButtonType = {
   content: string;
   onClick: (e?) => void;
   type: "primary" | "secondary";
-  className?: string; // Thêm prop className
+  className?: string;
 };
 
 type ButtonFixedProps = {
@@ -39,8 +39,7 @@ const ButtonFixed = forwardRef<HTMLDivElement, ButtonFixedProps>(
               variant={btn.type}
               size="large"
               onClick={btn.onClick}
-              className={btn.className}
-            >
+              className={btn.className}>
               {btn.content}
             </Button>
           ))}
